@@ -54,15 +54,6 @@ async def on_message(message):
 
     if message.content.startswith('$$leaderboard'):
         await leaderboard(conn, client, message, LEADERBOARD_LIMIT)
-
-    if message.reference is not None:
-        try:
-            channel = client.get_channel(message.reference.channel_id)
-            orig_msg = await channel.fetch_message(message.reference.message_id)
-            if orig_msg.author.id != message.author.id and hasRole(orig_msg.author.roles, REQUIRED_ROLE_ID):
-                processVote(message.id, orig_msg.author.id, message.author.id)
-        except discord.NotFound:
-            pass
     
     if message.mentions != []:
         for member in message.mentions:
