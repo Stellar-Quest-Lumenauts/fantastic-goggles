@@ -49,7 +49,7 @@ async def on_message(message):
     
     if message.mentions != []:
         for member in message.mentions:
-            if member.id == message.author.id:
+            if member.id == message.author.id and hasRole(member.roles, REQUIRED_ROLE_ID):
                 continue
             processVote(message.id, member.id, message.author.id)
 
@@ -59,10 +59,6 @@ async def on_reaction_add(reaction, user):
     if reaction.emoji == REACTION_TO_COMPARE and user.id != reaction.message.author.id and hasRole(reaction.message.author.roles, REQUIRED_ROLE_ID):
        processVote(reaction.message.id, reaction.message.author.id, user.id)
 
-
-
-
 if __name__ == '__main__':
     setup_db()
     client.run(BOT_TOKEN)
-
