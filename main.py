@@ -32,14 +32,6 @@ def processVote(message_id, author, backer):
     if updateHistory(conn, author, message_id, backer):
         print(f"{author} got an upvote!")
 
-def processDownvote(message_id, author = None, backer = None):
-    if removeHistory(conn, message_id, author, backer):
-        if backer != None and author != None:
-            print(f"{author} got an downvote!")
-        else:
-            print(f"{message_id} was deleted resulting in a downvote to the referenced!" )
-
-
 @client.event
 async def on_ready():
     print(f'We have logged in as {client.user}')
@@ -67,16 +59,7 @@ async def on_reaction_add(reaction, user):
     if reaction.emoji == REACTION_TO_COMPARE and user.id != reaction.message.author.id and hasRole(reaction.message.author.roles, REQUIRED_ROLE_ID):
        processVote(reaction.message.id, reaction.message.author.id, user.id)
 
-@client.event
-async def on_reaction_remove(reaction, user):
-    channel = reaction.message.channel
-    if reaction.emoji == REACTION_TO_COMPARE and user.id != reaction.message.author.id and hasRole(reaction.message.author.roles, REQUIRED_ROLE_ID):
-        processDownvote(reaction.message.id, reaction.message.author.id, user.id)
 
-@client.event
-async def on_message_delete(message):
-    if message.mentions != []:
-        processDownvote(message.id)
 
 
 if __name__ == '__main__':
