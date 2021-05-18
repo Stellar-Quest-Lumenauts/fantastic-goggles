@@ -31,3 +31,11 @@ def updateHistory(conn, author, message_id, backer):
     c.execute("INSERT INTO votes_history (user_id, message_id, backer) VALUES (?,?,?)", (int(author), int(message_id), int(backer), ))
     conn.commit()
 
+def queryHistory(conn, message_id):
+    """
+    Query for a Specific Message
+    """
+    c = conn.cursor()
+    c.execute("SELECT user_id from votes_history WHERE message_id=?", (int(message_id), ))
+    row = c.fetchone()
+    return row

@@ -2,7 +2,7 @@ import discord
 import sqlite3
 from sqlite3 import Error
 import os
-from helper import getUser, createUser, updateVote, updateHistory
+from helper import getUser, createUser, updateVote, updateHistory, queryHistory
 
 DATABASE_NAME = 'votes.db'
 REACTION_TO_COMPARE = '🐻'
@@ -25,7 +25,7 @@ conn = create_connection(DATABASE_NAME)
 def setup_db():
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS votes (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER, votes INTEGER)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER, message_id INTEGER, backer INTEGER)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER, message_id INTEGER, backer INTEGER, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
 
 def processVote(author, message_id, backer):
     row = getUser(conn, author)
@@ -69,9 +69,6 @@ async def on_message(message):
         embed.set_footer(text="Made with love, code and Python")
         await message.channel.send('And the results are in!', embed=embed)
 
-    print(message.reference)
-
-
     if message.reference is not None:
         try:
             channel = client.get_channel(message.reference.channel_id)
@@ -81,14 +78,11 @@ async def on_message(message):
         except discord.NotFound:
             pass
     
-    
-    print(message.mentions)
     if message.mentions != []:
         for member in message.mentions:
             if member.id == message.author.id:
                 continue
             processVote(member.id, message.id, message.author.id)
-
 
 @client.event
 async def on_reaction_add(reaction, user):
@@ -111,6 +105,20 @@ async def on_reaction_remove(reaction, user):
 
         print(f"{reaction.message.author} got a downvote!")
 
+@client.event
+async def on_message_delete(message):
+    data = queryHistory(conn, message.id)
+    if data is not None:
+        row = getUser(conn, data[0])
+        updateVote(conn,row[0], row[1]-1)
+
+        c = conn.cursor()
+        c.execute("DELETE FROM votes_history WHERE user_id=? AND message_id=?", (int(row[0]), int(data[0])))
+        conn.commit()
+
+        print(f"{row[0]} got downvoted by Message deletion.")
+
 if __name__ == '__main__':
     setup_db()
     client.run(BOT_TOKEN)
+
