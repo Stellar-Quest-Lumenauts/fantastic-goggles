@@ -3,11 +3,13 @@ import sqlite3
 from sqlite3 import Error
 import os
 from helper import getUser, createUser, updateVote, updateHistory, queryHistory
+from discord_helpers import leaderboard, hasRole
 
 DATABASE_NAME = 'votes.db'
 REACTION_TO_COMPARE = '🐻'
 LEADERBOARD_LIMIT = 10
 BOT_TOKEN = os.environ['DISCORD_BOT_TOKEN']
+REQUIRED_ROLE_ID = os.environ['ROLE_ID']
 
 def create_connection(db_file):
     """ create a database connection to a SQLite database """
@@ -38,6 +40,7 @@ def processVote(author, message_id, backer):
     updateHistory(conn, author, message_id, backer)
     print(f"{author} got an upvote!")
 
+
 @client.event
 async def on_ready():
     print(f'We have logged in as {client.user}')
@@ -51,29 +54,13 @@ async def on_message(message):
         await message.channel.send('Hello!')
 
     if message.content.startswith('$$leaderboard'):
-        embed=discord.Embed(title="Leaderboard", description="This are currently the Results", color=0x5125aa)
-
-        c = conn.cursor()
-        c.execute("SELECT user_id, votes from votes ORDER BY votes DESC")
-        rows = c.fetchall()
-
-        counter = 0
-        for row in rows: 
-            if row == None or counter == LEADERBOARD_LIMIT:
-                break
-
-            user = await client.fetch_user(row[0])
-            embed.add_field(name=f"``#{counter+1}`` {user.name}", value=f"{row[1]} Upvotes", inline=True)
-            counter+=1
-            
-        embed.set_footer(text="Made with love, code and Python")
-        await message.channel.send('And the results are in!', embed=embed)
+        await leaderboard(conn, client, message, LEADERBOARD_LIMIT)
 
     if message.reference is not None:
         try:
             channel = client.get_channel(message.reference.channel_id)
             orig_msg = await channel.fetch_message(message.reference.message_id)
-            if orig_msg.author.id != message.author.id:
+            if orig_msg.author.id != message.author.id and hasRole(orig_msg.author.roles, REQUIRED_ROLE_ID):
                 processVote(orig_msg.author.id, message.id, message.author.id)
         except discord.NotFound:
             pass
@@ -87,13 +74,13 @@ async def on_message(message):
 @client.event
 async def on_reaction_add(reaction, user):
     channel = reaction.message.channel
-    if reaction.emoji == REACTION_TO_COMPARE and user.id != reaction.message.author.id:
+    if reaction.emoji == REACTION_TO_COMPARE and user.id != reaction.message.author.id and hasRole(reaction.message.author.roles, REQUIRED_ROLE_ID):
        processVote(reaction.message.author.id, reaction.message.id, user.id)
 
 @client.event
 async def on_reaction_remove(reaction, user):
     channel = reaction.message.channel
-    if reaction.emoji == REACTION_TO_COMPARE and user.id != reaction.message.author.id:
+    if reaction.emoji == REACTION_TO_COMPARE and user.id != reaction.message.author.id and hasRole(reaction.message.author.roles, REQUIRED_ROLE_ID):
         row = getUser(conn, reaction.message.author.id)
         if row == None:
             return
