@@ -41,6 +41,9 @@ async def on_message(message):
     if message.author == client.user:
         return
 
+    if message.channel.id in [763798356484161569, 772838189920026635,  839229026194423898]: # General, Lumenauts, Report-spam
+        return
+
     if message.content.startswith('$hello'):
         await message.channel.send('Hello!')
 
