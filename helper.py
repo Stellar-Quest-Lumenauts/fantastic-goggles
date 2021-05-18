@@ -17,13 +17,13 @@ def updateHistory(conn, author, message_id, backer):
     conn.commit()
     return c.rowcount > 0
 
-def removeHistory(conn, message_id, author = -1, backer = -1):
+def removeHistory(conn, message_id, author = None, backer = None):
     """
     Updates the history to remove vote
     Returns success
     """
     c = conn.cursor()
-    if backer != -1 and author != -1:
+    if backer != None and author != None:
         c.execute("DELETE FROM votes_history WHERE user_id=? AND message_id=? AND backer=?", (int(author), int(message_id), int(backer), ))
     else:
         c.execute("DELETE FROM votes_history WHERE message_id=?", (int(message_id), ))

@@ -32,9 +32,9 @@ def processVote(message_id, author, backer):
     if updateHistory(conn, author, message_id, backer):
         print(f"{author} got an upvote!")
 
-def processDownvote(message_id, author = -1, backer = -1):
+def processDownvote(message_id, author = None, backer = None):
     if removeHistory(conn, message_id, author, backer):
-        if backer != -1 and author != -1:
+        if backer != None and author != None:
             print(f"{author} got an downvote!")
         else:
             print(f"{message_id} was deleted resulting in a downvote to the referenced!" )
