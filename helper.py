@@ -29,6 +29,7 @@ def removeHistory(conn, message_id, author = None, backer = None):
         c.execute("DELETE FROM votes_history WHERE message_id=?", (int(message_id), ))
     conn.commit()
     return c.rowcount > 0
+
 def fetchLeaderboard(conn):
     """
     Returns the current leaderboard
