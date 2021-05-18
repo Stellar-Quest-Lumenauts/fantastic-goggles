@@ -3,33 +3,40 @@ def getUser(conn, author):
     Query the User
     """
     c = conn.cursor()
-    c.execute("SELECT user_id, votes from votes WHERE user_id=?", (int(author), ))
+    c.execute("SELECT user_id, COUNT(*) as votes from votes_history WHERE user_id=?", (int(author), ))
     row = c.fetchone()
     return row
-
-def createUser(conn, author):
-    """
-    Creates the User
-    """
-    c = conn.cursor()
-    c.execute("INSERT INTO votes (user_id, votes) VALUES (?,1)", (int(author), ))
-    conn.commit()
-
-def updateVote(conn, author, vote):
-    """
-    Updates the Vote counter
-    """
-    c = conn.cursor()
-    c.execute("UPDATE votes SET votes=? WHERE user_id=?", (int(vote), int(author), ))
-    conn.commit()
 
 def updateHistory(conn, author, message_id, backer):
     """
     Updates the history
+    Returns success
     """
     c = conn.cursor()
     c.execute("INSERT INTO votes_history (user_id, message_id, backer) VALUES (?,?,?)", (int(author), int(message_id), int(backer), ))
     conn.commit()
+    return c.rowcount > 0
+
+def removeHistory(conn, message_id, author = None, backer = None):
+    """
+    Updates the history to remove vote
+    Returns success
+    """
+    c = conn.cursor()
+    if backer != None and author != None:
+        c.execute("DELETE FROM votes_history WHERE user_id=? AND message_id=? AND backer=?", (int(author), int(message_id), int(backer), ))
+    else:
+        c.execute("DELETE FROM votes_history WHERE message_id=?", (int(message_id), ))
+    conn.commit()
+    return c.rowcount > 0
+
+def fetchLeaderboard(conn):
+    """
+    Returns the current leaderboard
+    """
+    c = conn.cursor()
+    c.execute("SELECT user_id, COUNT() as votes FROM votes_history ORDER by votes DESC")
+    return c.fetchall()
 
 def queryHistory(conn, message_id):
     """

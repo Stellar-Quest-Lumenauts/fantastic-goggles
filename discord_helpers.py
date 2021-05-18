@@ -1,11 +1,10 @@
 import discord
+from helper import fetchLeaderboard
 
 async def leaderboard(conn, client, message, LEADERBOARD_LIMIT):
     embed=discord.Embed(title="Leaderboard", description="This are currently the Results", color=0x5125aa)
 
-    c = conn.cursor()
-    c.execute("SELECT user_id, votes from votes ORDER BY votes DESC")
-    rows = c.fetchall()
+    rows = fetchLeaderboard(conn)
 
     counter = 0
     for row in rows: 
