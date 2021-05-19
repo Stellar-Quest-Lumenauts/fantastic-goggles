@@ -1,5 +1,6 @@
 import discord
 import sqlite3
+import psycopg2
 from sqlite3 import Error
 import os
 from helper import *
@@ -10,14 +11,24 @@ REACTION_TO_COMPARE = '🐻'
 LEADERBOARD_LIMIT = 10
 BOT_TOKEN = os.environ['DISCORD_BOT_TOKEN']
 REQUIRED_ROLE_ID = os.environ['ROLE_ID']
+SQLITE3_ENABLED = True if os.environ['SQLITE3_ENABLED'] == True else False
 
 def create_connection(db_file):
     """ create a database connection to a SQLite database """
     conn = None
     try:
-        conn = sqlite3.connect(db_file)
+        if SQLITE3_ENABLED:
+            conn = sqlite3.connect(db_file)
+        else:
+            conn = psycopg2.connect(
+                host = os.environ['POSTGRE_HOST'],
+                database = os.environ['POSTGRE_DB'],
+                port = os.environ['POSTGRE_PORT'],
+                user = os.environ['POSTGRE_USER'],
+                password = os.environ['POSTGRE_PASSWORD']
+            )
         return conn
-    except Error as e:
+    except Exception as e:
         print(e)
 
 intents = discord.Intents(messages=True, guilds=True, members=True, reactions=True)
