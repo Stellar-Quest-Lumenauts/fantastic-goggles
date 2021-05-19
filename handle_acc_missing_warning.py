@@ -37,6 +37,9 @@ Use `/link <public_key>` now to connect your public-net stellar account!\
 ", colour=0xFF0000))
     await client.close()
 
-if __name__ == '__main__':
+def start():
     setup_db(conn)
     client.run(BOT_TOKEN)
+
+if __name__ == '__main__':
+    start()

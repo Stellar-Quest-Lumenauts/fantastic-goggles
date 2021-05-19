@@ -60,6 +60,9 @@ async def on_ready():
     await notify_user.send(content = await generate_report())
     await client.close()
 
-if __name__ == '__main__':
+def start():
     setup_db(conn)
     client.run(BOT_TOKEN)
+
+if __name__ == '__main__':
+    start()
