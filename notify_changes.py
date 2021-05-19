@@ -5,6 +5,7 @@ import os
 from helper import *
 from main import *
 import math
+from stellar_helpers import *
 
 intents = discord.Intents(dm_messages=True)
 client = discord.Client(intents=intents)
@@ -12,7 +13,7 @@ conn = create_connection(DATABASE_NAME)
 NOTIFY_USER  = os.environ['NOTIFY_USER']
 
 async def get_pricepot():
-    10 #todo
+    return fetch_account_balance()
 
 async def generate_report():
     week = getWeek(-1) # run on somewhen on monday therefor fetch last week
@@ -44,9 +45,10 @@ async def generate_report():
         payout = user[1] / sumVotes * pricepot
         payouts.append((user[2], payout))
         
+    tx_xdr = generate_reward_tx(payouts)
 
 
-    return f"{payouts}" #todo
+    return f"```{tx_xdr}```" #todo size limit?
 
 @client.event
 async def on_ready():
