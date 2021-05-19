@@ -33,7 +33,7 @@ async def on_ready():
         await user.send(embed=Embed(title="REMINDER:", description=f"\
 You have yet to connect an Stellar Public key to your discord account!\n\
 You would miss out on {missing[1]} vote(s) for the next reward distribution!\n\
-Use `/connect <public_key>` now to connect your public-net stellar account!\
+Use `/link <public_key>` now to connect your public-net stellar account!\
 ", colour=0xFF0000))
     await client.close()
 

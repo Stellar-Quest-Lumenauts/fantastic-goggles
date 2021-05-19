@@ -1,9 +1,12 @@
+from stellar_helpers import validate_pub_key
 import discord
 import sqlite3
 from sqlite3 import Error
 import os
 from helper import *
 from discord_helpers import leaderboard, hasRole
+from discord_slash import SlashCommand
+from discord_slash.utils.manage_commands import create_option
 
 DATABASE_NAME = 'votes.db'
 REACTION_TO_COMPARE = '🐻'
@@ -22,6 +25,7 @@ def create_connection(db_file):
 
 intents = discord.Intents(messages=True, guilds=True, members=True, reactions=True)
 client = discord.Client(intents=intents)
+slash = SlashCommand(client, sync_commands=True)
 conn = create_connection(DATABASE_NAME)
 
 def processVote(message_id, author, backer):
@@ -58,6 +62,23 @@ async def on_reaction_add(reaction, user):
     if reaction.emoji == REACTION_TO_COMPARE and user.id != reaction.message.author.id and hasRole(reaction.message.author.roles, REQUIRED_ROLE_ID):
        processVote(reaction.message.id, reaction.message.author.id, user.id)
 
+@slash.slash(name="link", 
+             description="Link your public key",
+             options=[
+                 create_option(
+                     name="public_key",
+                     description="public-net public key",
+                     option_type=3,
+                     required=True)  
+])
+async def _link_reward(ctx, public_key: str):
+    if not validate_pub_key(public_key):
+        await ctx.send("Invalid public key supplied!")
+    else:
+        if linkUserPubKey(conn, ctx.author_id, public_key):
+            await ctx.send(f"Linked `{public_key}` to your discord account!")
+        else:
+            await ctx.send("Unknown error linking your public key! Please ask somewhere...")
 if __name__ == '__main__':
     setup_db(conn)
     client.run(BOT_TOKEN)

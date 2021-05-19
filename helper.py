@@ -4,6 +4,15 @@ def setup_db(conn):
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER, message_id INTEGER, backer INTEGER, vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)''')
     c.execute('''CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, stellar_account VARCHAR(55))''')
+def linkUserPubKey(conn, user, key):
+    """
+    Insersts the connection discord_id <-> public key into the DB
+    return success as bool
+    """
+    c = conn.cursor()
+    c.execute("INSERT INTO users(user_id, stellar_account) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET stellar_account=?", (int(user), str(key), str(key)))
+    conn.commit()
+    return c.rowcount > 0
 
 def getUserPubKey(conn, user):
     """

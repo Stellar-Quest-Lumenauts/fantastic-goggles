@@ -59,3 +59,14 @@ def generate_reward_tx(rewardee):
     xdr = tx.set_timeout(30).build().to_xdr()
 
     return xdr
+
+def validate_pub_key(pub_key: str):
+    """
+    Valids a public key
+    Returns true if valid key
+    """
+    try:
+        Keypair.from_public_key(pub_key)
+        return True
+    except:
+        return False
