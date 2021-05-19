@@ -38,14 +38,18 @@ def generate_reward_tx(rewardee):
     """
     Generates transaction XDR full of claimable balance operations
     takes tewardee (array of tuples (pub_key, amount)) where pub_key is str and amount is float
-    returns XDR as string
+    returns XDR as string | None if unable to load account
     """
-    source_acc = Account(account_id=PUBLIC_KEY, sequence=1) # fetch sequence or will it be used with a fee bump?
+    try:
+        source_acc = server.load_account(PUBLIC_KEY) # fetch sequence or will it be used with a fee bump?
+    except:
+        print(f"Failed to load public reward account {PUBLIC_KEY}!")
+        return None
 
     tx = TransactionBuilder(
         source_account=source_acc,
         network_passphrase=STELLAR_PASSPHRASE,
-        base_fee=100)\
+        base_fee=server.fetch_base_fee())\
             .add_text_memo("Lumenaut reward!")
     
     for rewarded in rewardee:

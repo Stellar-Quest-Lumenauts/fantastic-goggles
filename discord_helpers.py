@@ -65,5 +65,8 @@ async def generate_report(conn):
         
     tx_xdr = generate_reward_tx(payouts)
 
+    if tx_xdr == None: 
+        return f"Failed to load reward account!"
+
 
     return f"```{tx_xdr}```" #todo size limit?
