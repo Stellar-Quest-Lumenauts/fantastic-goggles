@@ -43,7 +43,7 @@ def fetchLeaderboard(conn):
     Returns the current leaderboard
     """
     c = conn.cursor()
-    c.execute(prepareQuery("SELECT user_id, COUNT() as votes FROM votes_history ORDER by votes DESC"))
+    c.execute("SELECT user_id, COUNT() as votes FROM votes_history ORDER by votes DESC")
     return c.fetchall()
 
 def queryHistory(conn, message_id):
@@ -51,6 +51,6 @@ def queryHistory(conn, message_id):
     Query for a Specific Message
     """
     c = conn.cursor()
-    c.execute(prepareQuery("SELECT user_id from votes_history WHERE message_id=?", (int(message_id), )))
+    c.execute(prepareQuery("SELECT user_id from votes_history WHERE message_id=?"), (int(message_id), ))
     row = c.fetchone()
     return row
