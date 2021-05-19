@@ -46,8 +46,7 @@ def generate_reward_tx(rewardee):
     
     for rewarded in rewardee:
         reward = round(rewarded[1], 7)
-        
-        if rewarded >= 0:
+        if reward <= 0:
             continue
 
         tx.append_create_claimable_balance_op(

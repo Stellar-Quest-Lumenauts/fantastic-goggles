@@ -39,6 +39,9 @@ async def generate_report():
     
     pricepot = await get_pricepot()
 
+    if len(payoutUser) == 0:
+        return "No eligable users this week!"
+
     payouts = []
 
     for user in payoutUser:
