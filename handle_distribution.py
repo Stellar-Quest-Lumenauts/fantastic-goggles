@@ -40,8 +40,9 @@ async def generate_report():
     pricepot = await get_pricepot()
 
     if len(payoutUser) == 0:
-        return "No eligable users this week!"
-
+        return "No eligible users this week!"
+    if len(payoutUser) > 100:
+        return "Wow! There are a lot of eligible lumenauts (>100). We should upgrade our code to handle this case..."
     payouts = []
 
     for user in payoutUser:
