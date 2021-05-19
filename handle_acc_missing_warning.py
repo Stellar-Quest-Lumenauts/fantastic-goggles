@@ -19,7 +19,7 @@ async def fetch_users_missing_pub():
 
     for row in leaderboard_rows:
 
-        if not [user for user in user_rows if user[0] == row[0]]:
+        if not [user for user in user_rows if user[0] == row[0]] and row[0] != client.user.id:
             print(f"{row[0]} has no pub key connected to their account! They are missing out on {row[1]} upvotes.")
             missingUsers.append(row)
     
@@ -30,6 +30,9 @@ async def on_ready():
     print(f'We have logged in as {client.user}')
     for missing in await fetch_users_missing_pub():
         user = await client.fetch_user(missing[0])
+        if user.id == client.user.id:
+            continue
+
         await user.send(embed=Embed(title="REMINDER:", description=f"\
 You have yet to connect an Stellar Public key to your discord account!\n\
 You would miss out on {missing[1]} vote(s) for the next reward distribution!\n\

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 def setup_db(conn):
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER, message_id INTEGER, backer INTEGER, vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, stellar_account VARCHAR(55))''')
+    c.execute('''CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, stellar_account VARCHAR(55) NOT NULL ON CONFLICT REPLACE)''')
 
 def linkUserPubKey(conn, user, key):
     """
@@ -11,7 +11,7 @@ def linkUserPubKey(conn, user, key):
     return success as bool
     """
     c = conn.cursor()
-    c.execute("INSERT INTO users(user_id, stellar_account) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET stellar_account=?", (int(user), str(key), str(key)))
+    c.execute("INSERT INTO users(user_id, stellar_account) VALUES (?, ?)", (int(user), str(key)))
     conn.commit()
     return c.rowcount > 0
 
@@ -79,7 +79,7 @@ def fetchLeaderboard(conn, dateFrom = None, dateTo = None):
 
 
     c = conn.cursor()
-    c.execute("SELECT user_id, COUNT() as votes FROM votes_history WHERE vote_time >= ? AND vote_time <= ? ORDER by votes DESC", (dateFrom, dateTo))
+    c.execute("SELECT user_id, COUNT() as votes FROM votes_history WHERE vote_time >= ? AND vote_time <= ? GROUP BY user_id ORDER by votes DESC", (dateFrom, dateTo))
     return c.fetchall()
 
 def queryHistory(conn, message_id):

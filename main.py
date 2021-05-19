@@ -4,7 +4,7 @@ import sqlite3
 from sqlite3 import Error
 import os
 from helper import *
-from discord_helpers import leaderboard, hasRole
+from discord_helpers import leaderboard, hasRole, generate_report
 from discord_slash import SlashCommand
 from discord_slash.utils.manage_commands import create_option
 
@@ -13,6 +13,8 @@ REACTION_TO_COMPARE = '🐻'
 LEADERBOARD_LIMIT = 10
 BOT_TOKEN = os.environ['DISCORD_BOT_TOKEN']
 REQUIRED_ROLE_ID = os.environ['ROLE_ID']
+NOTIFY_USER = os.environ['NOTIFY_USER']
+IGNORED_CHANNELS = [763798356484161569, 772838189920026635,  839229026194423898] # General, Lumenauts, Report-spam
 
 def create_connection(db_file):
     """ create a database connection to a SQLite database """
@@ -41,7 +43,7 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.channel.id in [763798356484161569, 772838189920026635,  839229026194423898]: # General, Lumenauts, Report-spam
+    if message.channel.id in IGNORED_CHANNELS:
         return
 
     if message.content.startswith('$hello'):
@@ -49,7 +51,11 @@ async def on_message(message):
 
     if message.content.startswith('$$leaderboard'):
         await leaderboard(conn, client, message, LEADERBOARD_LIMIT)
-    
+
+    if message.content.startswith('$$distribute') and int(message.author.id) == int(NOTIFY_USER):
+        print("We were asked to manually run the distribution script")
+        await message.author.send(content = await generate_report(conn))
+
     if message.mentions != []:
         for member in message.mentions:
             if member.id == message.author.id and hasRole(member.roles, REQUIRED_ROLE_ID):
@@ -59,7 +65,11 @@ async def on_message(message):
 @client.event
 async def on_reaction_add(reaction, user):
     channel = reaction.message.channel
-    if reaction.emoji == REACTION_TO_COMPARE and user.id != reaction.message.author.id and hasRole(reaction.message.author.roles, REQUIRED_ROLE_ID):
+    
+    if channel.id in IGNORED_CHANNELS:
+        return
+
+    if reaction.emoji == REACTION_TO_COMPARE and user.id != reaction.message.author.id and hasRole(reaction.message.author.roles, REQUIRED_ROLE_ID) and user.id != client.user.id:
        processVote(reaction.message.id, reaction.message.author.id, user.id)
 
 @slash.slash(name="link", 

@@ -3,12 +3,13 @@ from stellar_sdk import TransactionBuilder, Server, Network, Keypair, Account, a
 import os
 import sys
 from stellar_sdk.operation.create_claimable_balance import Claimant
-from stellar_sdk.time_bounds import TimeBounds
-from stellar_sdk.xdr.base import String
 
 STELLAR_USE_TESTNET = 'USE_STELLAR_TEST_NET' in os.environ
 STELLAR_ENDPOINT = "https://horizon-testnet.stellar.org" if STELLAR_USE_TESTNET else "https://horizon.stellar.org"
 STELLAR_PASSPHRASE = Network.TESTNET_NETWORK_PASSPHRASE  if STELLAR_USE_TESTNET else Network.PUBLIC_NETWORK_PASSPHRASE
+
+if STELLAR_USE_TESTNET:
+    print("Using stellar testnet")
 
 PUBLIC_KEY = os.environ['REWARD_PUBLIC_KEY']
 
@@ -18,7 +19,11 @@ def fetch_account_balance(pubKey = PUBLIC_KEY):
     """
     Returns the balance of the given account available to be send 
     """
-    acc = server.accounts().account_id(PUBLIC_KEY).call()
+    try:
+        acc = server.accounts().account_id(PUBLIC_KEY).call()
+    except:
+        print(f"Specified account ({pubKey}) does not exists")
+        return 0
     balance = 0
     
     for b in acc['balances']:
@@ -27,7 +32,6 @@ def fetch_account_balance(pubKey = PUBLIC_KEY):
             break
     
     balance -= 0.5 * (2 + acc['subentry_count']) # base reserve
-    print(f"{balance}")
     return balance
 
 def generate_reward_tx(rewardee):
