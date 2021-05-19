@@ -4,6 +4,7 @@ from sqlite3 import Error
 import os
 from helper import *
 from discord_helpers import leaderboard, hasRole
+import datetime
 
 DATABASE_NAME = 'votes.db'
 REACTION_TO_COMPARE = '🐻'
@@ -23,10 +24,6 @@ def create_connection(db_file):
 intents = discord.Intents(messages=True, guilds=True, members=True, reactions=True)
 client = discord.Client(intents=intents)
 conn = create_connection(DATABASE_NAME)
-
-def setup_db():
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER, message_id INTEGER, backer INTEGER, vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)''')
 
 def processVote(message_id, author, backer):
     if updateHistory(conn, author, message_id, backer):
@@ -63,5 +60,5 @@ async def on_reaction_add(reaction, user):
        processVote(reaction.message.id, reaction.message.author.id, user.id)
 
 if __name__ == '__main__':
-    setup_db()
+    setup_db(conn)
     client.run(BOT_TOKEN)
