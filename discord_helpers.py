@@ -1,10 +1,12 @@
 import discord
-from helper import fetchLeaderboard
+from helper import fetchLeaderboard, getWeek
 
 async def leaderboard(conn, client, message, LEADERBOARD_LIMIT):
     embed=discord.Embed(title="Leaderboard", description="This are currently the Results", color=0x5125aa)
 
-    rows = fetchLeaderboard(conn)
+    dateLimit = getWeek()
+
+    rows = fetchLeaderboard(conn, dateLimit[0], dateLimit[1])
 
     counter = 0
     for row in rows: 

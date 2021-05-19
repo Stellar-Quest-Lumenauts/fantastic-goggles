@@ -4,7 +4,6 @@ from sqlite3 import Error
 import os
 from helper import *
 from discord_helpers import leaderboard, hasRole
-import datetime
 
 DATABASE_NAME = 'votes.db'
 REACTION_TO_COMPARE = '🐻'
