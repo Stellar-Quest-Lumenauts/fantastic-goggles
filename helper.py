@@ -3,6 +3,28 @@ from datetime import datetime, timedelta
 def setup_db(conn):
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER, message_id INTEGER, backer INTEGER, vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, stellar_account VARCHAR(55))''')
+def getUserPubKey(conn, user):
+    """
+    Queries the users public stellar key
+    Returns string or None
+    """
+    c = conn.cursor()
+    c.execute("SELECT stellar_account FROM users WHERE user_id=?", (int(user)))
+    row = c.fetchone()
+
+    if row == None:
+        return None
+    return row[0]
+
+def fetchUserPubKeys(conn):
+    """
+    Returns array containing (discord_id, stellar_public_key) tuples
+    """
+    c = conn.cursor()
+    c.execute("SELECT user_id, stellar_account FROM users")
+    return c.fetchall()
+
 def getUser(conn, author):
     """
     Query the User
