@@ -15,12 +15,19 @@ NOTIFY_USER = os.environ['NOTIFY_USER']
 IGNORED_CHANNELS = [763798356484161569, 772838189920026635,  839229026194423898] if not 'DISCORD_IGNORED_CHANNELS' in os.environ else json.load(os.environ['DISCORD_IGNORED_CHANNELS'])
 # defaults to General, Lumenauts, Report-spam
 
-
-if not (isinstance(REACTION_TO_COMPARE, list) or  len(REACTION_TO_COMPARE) != 0 and not isinstance(REACTION_TO_COMPARE[0], str)):
+if not isinstance(REACTION_TO_COMPARE, list) \
+   or (
+       len(REACTION_TO_COMPARE) != 0 \
+       and not isinstance(REACTION_TO_COMPARE[0], str)\
+      ):
     # REACTION_TO_COMPARE must be str to arr of str; empty array => wildcard 
     print("DISCORD_ALLOWED_REACTION env variable has to be array of strs!")
     exit
-if not isinstance(IGNORED_CHANNELS, list) or (len(IGNORED_CHANNELS) != 0 and not isinstance(IGNORED_CHANNELS[0], int)):
+if not isinstance(IGNORED_CHANNELS, list)\
+   or (
+       len(IGNORED_CHANNELS) != 0\
+       and not isinstance(IGNORED_CHANNELS[0], int)\
+      ):
     # IGNORE_CHANNELS must be array of ints
     print("DISCORD_IGNORED_CHANNELS env variable has to be array of ints!")
     exit
