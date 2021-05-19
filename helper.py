@@ -4,6 +4,7 @@ def setup_db(conn):
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER, message_id INTEGER, backer INTEGER, vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)''')
     c.execute('''CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, stellar_account VARCHAR(55))''')
+
 def getUserPubKey(conn, user):
     """
     Queries the users public stellar key

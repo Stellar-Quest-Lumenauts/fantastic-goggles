@@ -7,12 +7,8 @@ from stellar_sdk.time_bounds import TimeBounds
 from stellar_sdk.xdr.base import String
 
 STELLAR_USE_TESTNET = 'USE_STELLAR_TEST_NET' in os.environ
-STELLAR_ENDPOINT = "https://horizon.stellar.org"
-STELLAR_PASSPHRASE = Network.PUBLIC_NETWORK_PASSPHRASE
-
-if STELLAR_USE_TESTNET:
-    STELLAR_ENDPOINT = "https://horizon-testnet.stellar.org"
-    STELLAR_PASSPHRASE = Network.TESTNET_NETWORK_PASSPHRASE
+STELLAR_ENDPOINT = "https://horizon-testnet.stellar.org" if STELLAR_USE_TESTNET else "https://horizon.stellar.org"
+STELLAR_PASSPHRASE = Network.TESTNET_NETWORK_PASSPHRASE  if STELLAR_USE_TESTNET else Network.PUBLIC_NETWORK_PASSPHRASE
 
 PUBLIC_KEY = os.environ['REWARD_PUBLIC_KEY']
 
@@ -46,7 +42,7 @@ def generate_reward_tx(rewardee):
         source_account=source_acc,
         network_passphrase=STELLAR_PASSPHRASE,
         base_fee=100)\
-            .add_text_memo("Laumenaut reward!")
+            .add_text_memo("Lumenaut reward!")
     
     for rewarded in rewardee:
         reward = round(rewarded[1], 7)
@@ -58,7 +54,7 @@ def generate_reward_tx(rewardee):
             asset=asset.Asset.native(), 
             amount=str(reward),
             claimants=[Claimant(rewarded[0])]
-            )
+        )
 
     xdr = tx.set_timeout(30).build().to_xdr()
 
