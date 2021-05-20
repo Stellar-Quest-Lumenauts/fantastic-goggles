@@ -18,7 +18,7 @@ REQUIRED_ROLE_ID = os.environ['ROLE_ID']
 NOTIFY_USER = os.environ['NOTIFY_USER']
 
 IGNORED_CHANNELS = [763798356484161569, 772838189920026635,  839229026194423898] if not 'DISCORD_IGNORED_CHANNELS' in os.environ else json.load(os.environ['DISCORD_IGNORED_CHANNELS'])
-SQLITE3_ENABLED = True if not 'SQLITE3_ENABLED' in os.environ else os.environ['SQLITE3_ENABLED']
+SQLITE3_ENABLED = True if not 'SQLITE3_ENABLED' in os.environ else bool(os.environ['SQLITE3_ENABLED'])
 # defaults to General, Lumenauts, Report-spam
 
 if not isinstance(REACTION_TO_COMPARE, list) \
