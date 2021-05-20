@@ -17,6 +17,7 @@ REQUIRED_ROLE_ID = os.environ['ROLE_ID']
 NOTIFY_USER = os.environ['NOTIFY_USER']
 
 IGNORED_CHANNELS = [763798356484161569, 772838189920026635,  839229026194423898] if not 'DISCORD_IGNORED_CHANNELS' in os.environ else json.load(os.environ['DISCORD_IGNORED_CHANNELS'])
+SQLITE3_ENABLED = True if os.environ['SQLITE3_ENABLED'] == "True" else False
 # defaults to General, Lumenauts, Report-spam
 
 if not isinstance(REACTION_TO_COMPARE, list) \
@@ -40,9 +41,18 @@ def create_connection(db_file):
     """ create a database connection to a SQLite database """
     conn = None
     try:
-        conn = sqlite3.connect(db_file)
+        if SQLITE3_ENABLED:
+            conn = sqlite3.connect(db_file)
+        else:
+            conn = psycopg2.connect(
+              host = os.environ['POSTGRE_HOST'],
+              database = os.environ['POSTGRE_DB'],
+              port = os.environ['POSTGRE_PORT'],
+              user = os.environ['POSTGRE_USER'],
+              password = os.environ['POSTGRE_PASSWORD']
+            )
         return conn
-    except Error as e:
+    except Exception as e:
         print(e)
 
 intents = discord.Intents(messages=True, guilds=True, members=True, reactions=True)
