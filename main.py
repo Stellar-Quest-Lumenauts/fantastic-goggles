@@ -2,6 +2,7 @@ from stellar_helpers import validate_pub_key
 import discord
 import sqlite3
 from sqlite3 import Error
+import psycopg2
 import os
 from helper import *
 from discord_helpers import leaderboard, hasRole, notify_submitter
