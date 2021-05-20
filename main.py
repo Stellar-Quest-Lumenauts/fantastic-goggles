@@ -17,9 +17,8 @@ BOT_TOKEN = os.environ['DISCORD_BOT_TOKEN']
 REQUIRED_ROLE_ID = os.environ['ROLE_ID']
 NOTIFY_USER = os.environ['NOTIFY_USER']
 
-IGNORED_CHANNELS = [763798356484161569, 772838189920026635,  839229026194423898] if not 'DISCORD_IGNORED_CHANNELS' in os.environ else json.load(os.environ['DISCORD_IGNORED_CHANNELS'])
+WHITELIST_CHANNELS = [] if not 'DISCORD_WHITELIST_CHANNELS' in os.environ else json.load(os.environ['DISCORD_WHITELIST_CHANNELS'])
 SQLITE3_ENABLED = True if not 'SQLITE3_ENABLED' in os.environ else bool(os.environ['SQLITE3_ENABLED'])
-# defaults to General, Lumenauts, Report-spam
 
 if not isinstance(REACTION_TO_COMPARE, list) \
    or (
@@ -29,13 +28,13 @@ if not isinstance(REACTION_TO_COMPARE, list) \
     # REACTION_TO_COMPARE must be str to arr of str; empty array => wildcard 
     print("DISCORD_ALLOWED_REACTION env variable has to be array of strs!")
     exit
-if not isinstance(IGNORED_CHANNELS, list)\
+if not isinstance(WHITELIST_CHANNELS, list)\
    or (
-       len(IGNORED_CHANNELS) != 0\
-       and not isinstance(IGNORED_CHANNELS[0], int)\
+       len(WHITELIST_CHANNELS) != 0\
+       and not isinstance(WHITELIST_CHANNELS[0], int)\
       ):
     # IGNORE_CHANNELS must be array of ints
-    print("DISCORD_IGNORED_CHANNELS env variable has to be array of ints!")
+    print("DISCORD_WHITELIST_CHANNELS env variable has to be array of ints!")
     exit
 
 def create_connection(db_file):
@@ -85,7 +84,7 @@ async def on_message(message):
         print("We were asked to manually run the distribution script")
         await notify_submitter(client, conn, NOTIFY_USER)
     
-    if message.channel.id in IGNORED_CHANNELS:
+    if not message.channel.id in WHITELIST_CHANNELS and len(WHITELIST_CHANNELS) != 0:
         return
 
     if message.mentions != []:
@@ -98,9 +97,8 @@ async def on_message(message):
 async def on_reaction_add(reaction, user):
     channel = reaction.message.channel
     
-    if channel.id in IGNORED_CHANNELS:
+    if not channel.id in WHITELIST_CHANNELS and len(WHITELIST_CHANNELS) != 0:
         return
-
 
     if (reaction.emoji in REACTION_TO_COMPARE or len(REACTION_TO_COMPARE) == 0)\
         and user.id != reaction.message.author.id\
