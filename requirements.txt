@@ -1,1 +1,4 @@
 discord.py
+discord-py-slash-command
+stellar-sdk
+postbin

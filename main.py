@@ -1,9 +1,12 @@
+from stellar_helpers import validate_pub_key
 import discord
 import sqlite3
 from sqlite3 import Error
 import os
 from helper import *
-from discord_helpers import leaderboard, hasRole
+from discord_helpers import leaderboard, hasRole, notify_submitter
+from discord_slash import SlashCommand
+from discord_slash.utils.manage_commands import create_option
 import json
 
 DATABASE_NAME = 'votes.db'
@@ -12,6 +15,7 @@ LEADERBOARD_LIMIT = 10
 BOT_TOKEN = os.environ['DISCORD_BOT_TOKEN']
 REQUIRED_ROLE_ID = os.environ['ROLE_ID']
 NOTIFY_USER = os.environ['NOTIFY_USER']
+
 IGNORED_CHANNELS = [763798356484161569, 772838189920026635,  839229026194423898] if not 'DISCORD_IGNORED_CHANNELS' in os.environ else json.load(os.environ['DISCORD_IGNORED_CHANNELS'])
 # defaults to General, Lumenauts, Report-spam
 
@@ -43,11 +47,8 @@ def create_connection(db_file):
 
 intents = discord.Intents(messages=True, guilds=True, members=True, reactions=True)
 client = discord.Client(intents=intents)
+slash = SlashCommand(client, sync_commands=True)
 conn = create_connection(DATABASE_NAME)
-
-def setup_db():
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER, message_id INTEGER, backer INTEGER, vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)''')
 
 def processVote(message_id, author, backer):
     if updateHistory(conn, author, message_id, backer):
@@ -68,6 +69,10 @@ async def on_message(message):
 
     if message.content.startswith('$$leaderboard'):
         await leaderboard(conn, client, message, LEADERBOARD_LIMIT)
+
+    if message.content.startswith('$$distribute') and int(message.author.id) == int(NOTIFY_USER):
+        print("We were asked to manually run the distribution script")
+        await notify_submitter(client, conn, NOTIFY_USER)
     
     if message.channel.id in IGNORED_CHANNELS:
         return
@@ -85,12 +90,30 @@ async def on_reaction_add(reaction, user):
     if channel.id in IGNORED_CHANNELS:
         return
 
+
     if (reaction.emoji in REACTION_TO_COMPARE or len(REACTION_TO_COMPARE) == 0)\
         and user.id != reaction.message.author.id\
         and hasRole(reaction.message.author.roles, REQUIRED_ROLE_ID)\
         and user.id != client.user.id:
        processVote(reaction.message.id, reaction.message.author.id, user.id)
 
+@slash.slash(name="link", 
+             description="Link your public key",
+             options=[
+                 create_option(
+                     name="public_key",
+                     description="public-net public key",
+                     option_type=3,
+                     required=True)  
+])
+async def _link_reward(ctx, public_key: str):
+    if not validate_pub_key(public_key):
+        await ctx.send("Invalid public key supplied!")
+    else:
+        if linkUserPubKey(conn, ctx.author_id, public_key):
+            await ctx.send(f"Linked `{public_key}` to your discord account!")
+        else:
+            await ctx.send("Unknown error linking your public key! Please ask somewhere...")
 if __name__ == '__main__':
-    setup_db()
+    setup_db(conn)
     client.run(BOT_TOKEN)
