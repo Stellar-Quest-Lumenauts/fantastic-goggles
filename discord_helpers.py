@@ -38,8 +38,6 @@ async def generate_report(conn):
     user_rows = fetchUserPubKeys(conn)
     sumVotes = 0
 
-    BASE_FEE = 10000
-
     payoutUser = []
 
     for row in leaderboard_rows:
@@ -71,7 +69,6 @@ async def generate_report(conn):
     if pricepot <= 0:
         return f"Balance of Pricepot is not high enough to support {len(payoutUser)} eligible lumenauts!"
 
-
     for user in payoutUser:
         payout = user[1] / sumVotes * pricepot
         payouts.append((user[2], payout))
@@ -80,7 +77,6 @@ async def generate_report(conn):
 
     if tx_xdr == None: 
         return f"Failed to load reward account!"
-
 
     return f"```{tx_xdr}```" #todo size limit?
 

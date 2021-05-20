@@ -9,6 +9,8 @@ STELLAR_USE_TESTNET = 'USE_STELLAR_TEST_NET' in os.environ
 STELLAR_ENDPOINT = "https://horizon-testnet.stellar.org" if STELLAR_USE_TESTNET else "https://horizon.stellar.org"
 STELLAR_PASSPHRASE = Network.TESTNET_NETWORK_PASSPHRASE  if STELLAR_USE_TESTNET else Network.PUBLIC_NETWORK_PASSPHRASE
 
+BASE_FEE = 10000 if 'STELLAR_BASE_FEE' not in os.environ else os.environ['STELLAR_BASE_FEE']
+
 if STELLAR_USE_TESTNET:
     print("Using stellar testnet")
 
@@ -47,10 +49,16 @@ def generate_reward_tx(rewardee, base_fee = None):
         print(f"Failed to load public reward account {PUBLIC_KEY}!")
         return None
 
+    fee = BASE_FEE
+
+    try:
+        fee = server.fetch_base_fee() if base_fee == None else base_fee
+    except:
+        print(f"Error fetching base fees from networking! Defaulting to {BASE_FEE}")
     tx = TransactionBuilder(
         source_account=source_acc,
         network_passphrase=STELLAR_PASSPHRASE,
-        base_fee=server.fetch_base_fee() if base_fee == None else base_fee
+        base_fee=fee
         )\
             .add_text_memo("Lumenaut reward!")
     
