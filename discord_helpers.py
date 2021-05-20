@@ -29,11 +29,7 @@ def hasRole(roles, REQUIRED_ROLE_ID):
     return False
 
 async def generate_report(conn):
-    last_tx_date = fetch_last_tx()
-
-    if last_tx_date == None:
-        return "Failed to load past transactions of reward account! Does it exist?"
-
+    last_tx_date = fetch_last_tx() # possible bug if last_tx_date == None => counting all votes ever <--> this should only happen when account is new
     leaderboard_rows = fetchLeaderboard(conn, last_tx_date, datetime.now())
     user_rows = fetchUserPubKeys(conn)
     sumVotes = 0
@@ -78,7 +74,7 @@ async def generate_report(conn):
     if tx_xdr == None: 
         return f"Failed to load reward account!"
 
-    return f"```{tx_xdr}```" #todo size limit?
+    return f"{tx_xdr}" #todo size limit?
 
 async def notify_submitter(client, conn, user):
     notify_user = await client.fetch_user(user)
@@ -86,5 +82,5 @@ async def notify_submitter(client, conn, user):
     if content.startswith('AA'): # is XDR
         content = upload_to_hastebin(content)
     else:
-        content = f"`{content}`"
+        content = f"```{content}```"
     await notify_user.send(content = f"New week, new lumenaut rewards:\n{content}")

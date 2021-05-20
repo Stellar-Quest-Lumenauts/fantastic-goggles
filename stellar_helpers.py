@@ -4,6 +4,7 @@ from stellar_sdk import TransactionBuilder, Server, Network, Keypair, Account, a
 import os
 import sys
 from stellar_sdk.operation.create_claimable_balance import Claimant
+from stellar_sdk.transaction import Transaction
 
 STELLAR_USE_TESTNET = 'USE_STELLAR_TEST_NET' in os.environ
 STELLAR_ENDPOINT = "https://horizon-testnet.stellar.org" if STELLAR_USE_TESTNET else "https://horizon.stellar.org"
@@ -78,20 +79,29 @@ def generate_reward_tx(rewardee, base_fee = None):
 
     return xdr
 
-def fetch_last_tx(pubKey: str = PUBLIC_KEY):
+def fetch_last_tx(pubKey: str = PUBLIC_KEY, memo = "Lumenaut reward!"):
     """
     Finds the last transaction a account submitted and fetches the creation time
+    memo can be specified to search for a specific memo
     If timeBounds.minTime is not set use created_at
     Returns datetime or None if account not found
     """
     try:
-        tx = server.transactions().for_account(pubKey).include_failed(False).limit(1).order("desc").call()
-        records = tx['_embedded']['records'][0]
-        created = records['created_at']
-        timeBound = records['valid_after']
-        if timeBound == "1970-01-01T00:00:00Z": # not set
-            return datetime.strptime(created, "%Y-%m-%dT%H:%M:%SZ")            
-        return datetime.strptime(timeBound, "%Y-%m-%dT%H:%M:%SZ")
+        txs = server.transactions().for_account(pubKey).include_failed(False).limit(200).order("desc").call()['_embedded']['records']
+
+        for records in txs:
+            if records['source_account'] != pubKey:
+                continue
+        
+            if memo != None and (records['memo_type'] != 'text' or records['memo'] != memo):
+                continue 
+
+            created = records['created_at']
+            timeBound = records['valid_after']
+            if timeBound == "1970-01-01T00:00:00Z": # not set
+                return datetime.strptime(created, "%Y-%m-%dT%H:%M:%SZ")            
+            return datetime.strptime(timeBound, "%Y-%m-%dT%H:%M:%SZ")
+        return None
     except:
         return None
 
