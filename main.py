@@ -2,6 +2,7 @@ from stellar_helpers import validate_pub_key
 import discord
 import sqlite3
 from sqlite3 import Error
+import psycopg2
 import os
 from helper import *
 from discord_helpers import leaderboard, hasRole, notify_submitter
@@ -17,7 +18,7 @@ REQUIRED_ROLE_ID = os.environ['ROLE_ID']
 NOTIFY_USER = os.environ['NOTIFY_USER']
 
 WHITELIST_CHANNELS = [] if not 'DISCORD_WHITELIST_CHANNELS' in os.environ else json.load(os.environ['DISCORD_WHITELIST_CHANNELS'])
-# defaults to General, Lumenauts, Report-spam
+SQLITE3_ENABLED = True if not 'SQLITE3_ENABLED' in os.environ else bool(os.environ['SQLITE3_ENABLED'])
 
 if not isinstance(REACTION_TO_COMPARE, list) \
    or (
@@ -40,9 +41,18 @@ def create_connection(db_file):
     """ create a database connection to a SQLite database """
     conn = None
     try:
-        conn = sqlite3.connect(db_file)
+        if SQLITE3_ENABLED:
+            conn = sqlite3.connect(db_file)
+        else:
+            conn = psycopg2.connect(
+              host = os.environ['POSTGRE_HOST'],
+              database = os.environ['POSTGRE_DB'],
+              port = os.environ['POSTGRE_PORT'],
+              user = os.environ['POSTGRE_USER'],
+              password = os.environ['POSTGRE_PASSWORD']
+            )
         return conn
-    except Error as e:
+    except Exception as e:
         print(e)
 
 intents = discord.Intents(messages=True, guilds=True, members=True, reactions=True)
