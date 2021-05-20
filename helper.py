@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 import postbin
 
-SQLITE3_ENABLED = True if os.environ['SQLITE3_ENABLED'] == "True" else False
+SQLITE3_ENABLED = True if not 'SQLITE3_ENABLED' in os.environ else os.envior['SQLITE3_ENABLED']
 
 def prepareQuery(query):
     """
