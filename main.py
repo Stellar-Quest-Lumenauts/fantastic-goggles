@@ -4,7 +4,7 @@ import sqlite3
 from sqlite3 import Error
 import os
 from helper import *
-from discord_helpers import leaderboard, hasRole, generate_report
+from discord_helpers import leaderboard, hasRole, notify_submitter
 from discord_slash import SlashCommand
 from discord_slash.utils.manage_commands import create_option
 
@@ -54,7 +54,7 @@ async def on_message(message):
 
     if message.content.startswith('$$distribute') and int(message.author.id) == int(NOTIFY_USER):
         print("We were asked to manually run the distribution script")
-        await message.author.send(content = await generate_report(conn))
+        await notify_submitter(client, conn, NOTIFY_USER)
 
     if message.mentions != []:
         for member in message.mentions:

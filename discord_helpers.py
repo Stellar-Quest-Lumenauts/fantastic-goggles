@@ -1,11 +1,15 @@
 import discord
-from helper import fetchLeaderboard, fetchUserPubKeys
+from helper import fetchLeaderboard, fetchUserPubKeys, upload_to_hastebin
 from stellar_helpers import *
 
 async def leaderboard(conn, client, message, LEADERBOARD_LIMIT):
-    embed=discord.Embed(title="Leaderboard", description="This are currently the Results", color=0x5125aa)
+    last = fetch_last_tx()
+    embed=discord.Embed(title="Leaderboard", description=f"This are currently the Results\n Last distribution was {last}", color=0x5125aa)
 
-    rows = fetchLeaderboard(conn, fetch_last_tx(), datetime.now())
+    rows = fetchLeaderboard(conn, last, datetime.now())
+
+    if len(rows) == 0:
+        embed.add_field(name="``#1`` KanayeNet", value="Even without any votes he is leading!")
 
     counter = 0
     for row in rows: 
@@ -57,7 +61,7 @@ async def generate_report(conn):
     pricepot = fetch_account_balance() - tx_cost
 
     if len(payoutUser) == 0:
-        return "No eligible users this week!"
+        return "No eligible users this time!"
     if len(payoutUser) > 100:
         return "Wow! There are a lot of eligible lumenauts (>100). We should upgrade our code to handle this case..."
     payouts = []
@@ -79,3 +83,12 @@ async def generate_report(conn):
 
 
     return f"```{tx_xdr}```" #todo size limit?
+
+async def notify_submitter(client, conn, user):
+    notify_user = await client.fetch_user(user)
+    content = await generate_report(conn)
+    if content.startswith('AA'): # is XDR
+        content = upload_to_hastebin(content)
+    else:
+        content = f"`{content}`"
+    await notify_user.send(content = f"New week, new lumenaut rewards:\n{content}")

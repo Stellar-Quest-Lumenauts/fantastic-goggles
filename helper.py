@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import datetime
+import postbin
 
 def setup_db(conn):
     c = conn.cursor()
@@ -90,3 +91,10 @@ def queryHistory(conn, message_id):
     c.execute("SELECT user_id from votes_history WHERE message_id=?", (int(message_id), ))
     row = c.fetchone()
     return row
+
+def upload_to_hastebin(content: str):
+    """
+    Upload a given content to hastebin.com
+    Returns URL of uploaded content
+    """
+    return postbin.postSync(content)

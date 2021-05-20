@@ -2,7 +2,7 @@ import discord
 import os
 from helper import *
 from main import *
-from discord_helpers import generate_report
+from discord_helpers import notify_submitter
 
 intents = discord.Intents(dm_messages=True)
 client = discord.Client(intents=intents)
@@ -12,8 +12,7 @@ NOTIFY_USER  = os.environ['NOTIFY_USER']
 @client.event
 async def on_ready():
     print(f'We have logged in as {client.user}')
-    notify_user = await client.fetch_user(NOTIFY_USER)
-    await notify_user.send(content = await generate_report(conn))
+    await notify_submitter(client, conn, NOTIFY_USER)
     await client.close()
 
 def start():

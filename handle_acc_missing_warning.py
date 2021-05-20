@@ -1,3 +1,4 @@
+from stellar_helpers import fetch_last_tx
 import discord
 from discord.embeds import Embed
 from helper import *
@@ -12,8 +13,8 @@ async def fetch_users_missing_pub():
     Fetches all users still missing an public key for reward distribution
     returns array of tuples (user_id, potential_votes) 
     """
-    week = getWeek(1) # run before week ends
-    leaderboard_rows = fetchLeaderboard(conn, week[0], week[1])
+
+    leaderboard_rows = fetchLeaderboard(conn, fetch_last_tx(), datetime.now())
     user_rows = fetchUserPubKeys(conn)
     missingUsers = []
 
