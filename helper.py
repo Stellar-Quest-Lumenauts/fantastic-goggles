@@ -10,6 +10,7 @@ def prepareQuery(query):
     """
     if SQLITE3_ENABLED == False:
         return query.replace('?', '%s')
+    return query
 
 def setup_db(conn):
     c = conn.cursor()
