@@ -1,3 +1,4 @@
+from datetime import datetime
 import time
 from stellar_sdk import TransactionBuilder, Server, Network, Keypair, Account, asset
 import os
@@ -65,9 +66,26 @@ def generate_reward_tx(rewardee, base_fee = None):
         )
 
     now = int(time.time())
-    xdr = tx.add_time_bounds(now, now+24*60*60).build().to_xdr() # make valid one day from now
+    xdr = tx.add_time_bounds(now, 0).build().to_xdr() # make valid one day from now
 
     return xdr
+
+def fetch_last_tx(pubKey: str = PUBLIC_KEY):
+    """
+    Finds the last transaction a account submitted and fetches the creation time
+    If timeBounds.minTime is not set use created_at
+    Returns datetime or None if account not found
+    """
+    try:
+        tx = server.transactions().for_account(pubKey).include_failed(False).limit(1).order("desc").call()
+        records = tx['_embedded']['records'][0]
+        created = records['created_at']
+        timeBound = records['valid_after']
+        if timeBound == "1970-01-01T00:00:00Z": # not set
+            return datetime.strptime(created, "%Y-%m-%dT%H:%M:%SZ")            
+        return datetime.strptime(timeBound, "%Y-%m-%dT%H:%M:%SZ")
+    except:
+        return None
 
 def validate_pub_key(pub_key: str):
     """

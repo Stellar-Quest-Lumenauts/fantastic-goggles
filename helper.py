@@ -90,13 +90,3 @@ def queryHistory(conn, message_id):
     c.execute("SELECT user_id from votes_history WHERE message_id=?", (int(message_id), ))
     row = c.fetchone()
     return row
-
-def getWeek(weekDelta=0):
-    """
-    Returns the tuple (weekStart, weekEnd|now) with dateTime objects
-    weekDelta defines which week should be returned
-    """
-    now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    monday = now - timedelta(days=now.weekday())
-    sunday = monday + timedelta(days=6, hours=23, minutes=59, seconds=59)
-    return (monday, sunday)

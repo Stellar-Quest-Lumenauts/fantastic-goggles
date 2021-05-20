@@ -1,13 +1,11 @@
 import discord
-from helper import fetchLeaderboard, fetchUserPubKeys, getWeek
+from helper import fetchLeaderboard, fetchUserPubKeys
 from stellar_helpers import *
 
 async def leaderboard(conn, client, message, LEADERBOARD_LIMIT):
     embed=discord.Embed(title="Leaderboard", description="This are currently the Results", color=0x5125aa)
 
-    dateLimit = getWeek()
-
-    rows = fetchLeaderboard(conn, dateLimit[0], dateLimit[1])
+    rows = fetchLeaderboard(conn, fetch_last_tx(), datetime.now())
 
     counter = 0
     for row in rows: 
@@ -27,8 +25,12 @@ def hasRole(roles, REQUIRED_ROLE_ID):
     return False
 
 async def generate_report(conn):
-    week = getWeek(-1) # run on somewhen on monday therefor fetch last week
-    leaderboard_rows = fetchLeaderboard(conn, week[0], week[1])
+    last_tx_date = fetch_last_tx()
+
+    if last_tx_date == None:
+        return "Failed to load past transactions of reward account! Does it exist?"
+
+    leaderboard_rows = fetchLeaderboard(conn, last_tx_date, datetime.now())
     user_rows = fetchUserPubKeys(conn)
     sumVotes = 0
 
