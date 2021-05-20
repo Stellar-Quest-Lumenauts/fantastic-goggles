@@ -18,7 +18,7 @@ def setup_db(conn):
         c.execute('''CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, stellar_account VARCHAR(55) NOT NULL ON CONFLICT REPLACE)''')
     else:
         c.execute('''CREATE TABLE IF NOT EXISTS votes_history (id SERIAL NOT NULL PRIMARY KEY, user_id BIGINT, message_id BIGINT, backer BIGINT, vote_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)''')
-        c.execute('''CREATE TABLE IF NOT EXISTS users(user_id SERIAL NOT NULL PRIMARY KEY, stellar_account VARCHAR(55) NOT NULL ON CONFLICT REPLACE)''')
+        #c.execute('''CREATE TABLE IF NOT EXISTS users(user_id SERIAL NOT NULL PRIMARY KEY, stellar_account VARCHAR(55) UNIQUE NOT NULL)''')
 
 def linkUserPubKey(conn, user, key):
     """
@@ -26,7 +26,11 @@ def linkUserPubKey(conn, user, key):
     return success as bool
     """
     c = conn.cursor()
-    c.execute(prepareQuery("INSERT INTO users(user_id, stellar_account) VALUES (?, ?)"), (int(user), str(key)))
+    if SQLITE3_ENABLED:
+        c.execute("INSERT INTO users(user_id, stellar_account) VALUES (?, ?)", (int(user), str(key)))
+    else:
+        #c.execute("INSERT INTO users(user_id, stellar_account) VALUES (%s, %s) ON CONFLICT (stellar_account) DO UPDATE SET stellar_account=%s", (int(user), str(key), str(key)))
+        pass
     conn.commit()
     return c.rowcount > 0
 
