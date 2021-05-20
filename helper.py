@@ -1,6 +1,6 @@
 from datetime import datetime
-import postbin
 import os
+import postbin
 
 SQLITE3_ENABLED = True if os.environ['SQLITE3_ENABLED'] == "True" else False
 
@@ -13,12 +13,16 @@ def prepareQuery(query):
 
 def setup_db(conn):
     c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER, message_id INTEGER, backer INTEGER, vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, stellar_account VARCHAR(55) NOT NULL ON CONFLICT REPLACE)''')
+    if SQLITE3_ENABLED:
+        c.execute('''CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER, message_id INTEGER, backer INTEGER, vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+        c.execute('''CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, stellar_account VARCHAR(55) NOT NULL ON CONFLICT REPLACE)''')
+    else:
+        c.execute('''CREATE TABLE IF NOT EXISTS votes_history (id SERIAL NOT NULL PRIMARY KEY, user_id BIGINT, message_id BIGINT, backer BIGINT, vote_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)''')
+        c.execute('''CREATE TABLE IF NOT EXISTS users(user_id SERIAL NOT NULL PRIMARY KEY, stellar_account VARCHAR(55) NOT NULL ON CONFLICT REPLACE)''')
 
 def linkUserPubKey(conn, user, key):
     """
-    Insersts the connection discord_id <-> public key into the DB
+    Inserts the connection discord_id <-> public key into the DB
     return success as bool
     """
     c = conn.cursor()
@@ -87,6 +91,7 @@ def fetchLeaderboard(conn, dateFrom = None, dateTo = None):
         dateFrom = datetime.utcfromtimestamp(0)
     if dateTo == None:
         dateTo = datetime.now()
+
 
     c = conn.cursor()
     c.execute(prepareQuery("SELECT user_id, COUNT(user_id) as votes FROM votes_history WHERE vote_time >= ? AND vote_time <= ? GROUP BY user_id ORDER by votes DESC"), (dateFrom, dateTo))
