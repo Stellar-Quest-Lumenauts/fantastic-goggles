@@ -17,7 +17,7 @@ BOT_TOKEN = os.environ['DISCORD_BOT_TOKEN']
 REQUIRED_ROLE_ID = os.environ['ROLE_ID']
 NOTIFY_USER = os.environ['NOTIFY_USER']
 
-WHITELIST_CHANNELS = [] if not 'DISCORD_WHITELIST_CHANNELS' in os.environ else json.load(os.environ['DISCORD_WHITELIST_CHANNELS'])
+WHITELIST_CHANNELS = [] if not 'DISCORD_WHITELIST_CHANNELS' in os.environ else json.loads(os.environ['DISCORD_WHITELIST_CHANNELS'])
 SQLITE3_ENABLED = True if not 'SQLITE3_ENABLED' in os.environ else bool(os.environ['SQLITE3_ENABLED'])
 
 if not isinstance(REACTION_TO_COMPARE, list) \
