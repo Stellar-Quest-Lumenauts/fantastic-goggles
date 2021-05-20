@@ -32,6 +32,8 @@ async def generate_report(conn):
     user_rows = fetchUserPubKeys(conn)
     sumVotes = 0
 
+    BASE_FEE = 10000
+
     payoutUser = []
 
     for row in leaderboard_rows:
@@ -47,11 +49,10 @@ async def generate_report(conn):
             payoutUser.append((row[0], row[1], pubKey))
         else:
             print(f"{row[0]} has no pub key connected to their account! They are missing out on {row[1]} upvotes :(")
-    
-    pricepot = fetch_account_balance()
 
-    if pricepot <= 0:
-        return "Balance of pricepot is <= 0!"
+    tx_cost = (BASE_FEE * len(payoutUser)) / 1000000
+
+    pricepot = fetch_account_balance() - tx_cost
 
     if len(payoutUser) == 0:
         return "No eligible users this week!"
@@ -59,11 +60,17 @@ async def generate_report(conn):
         return "Wow! There are a lot of eligible lumenauts (>100). We should upgrade our code to handle this case..."
     payouts = []
 
+    pricepot -= len(payoutUser) # base reserve * 2 (2 claimaints for each claimableBalance)
+
+    if pricepot <= 0:
+        return f"Balance of Pricepot is not high enough to support {len(payoutUser)} eligible lumenauts!"
+
+
     for user in payoutUser:
         payout = user[1] / sumVotes * pricepot
         payouts.append((user[2], payout))
         
-    tx_xdr = generate_reward_tx(payouts)
+    tx_xdr = generate_reward_tx(payouts, BASE_FEE)
 
     if tx_xdr == None: 
         return f"Failed to load reward account!"

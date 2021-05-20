@@ -1,4 +1,4 @@
-from decimal import Decimal
+import time
 from stellar_sdk import TransactionBuilder, Server, Network, Keypair, Account, asset
 import os
 import sys
@@ -34,7 +34,7 @@ def fetch_account_balance(pubKey = PUBLIC_KEY):
     balance -= 0.5 * (2 + acc['subentry_count']) # base reserve
     return balance
 
-def generate_reward_tx(rewardee):
+def generate_reward_tx(rewardee, base_fee = None):
     """
     Generates transaction XDR full of claimable balance operations
     takes tewardee (array of tuples (pub_key, amount)) where pub_key is str and amount is float
@@ -49,7 +49,8 @@ def generate_reward_tx(rewardee):
     tx = TransactionBuilder(
         source_account=source_acc,
         network_passphrase=STELLAR_PASSPHRASE,
-        base_fee=server.fetch_base_fee())\
+        base_fee=server.fetch_base_fee() if base_fee == None else base_fee
+        )\
             .add_text_memo("Lumenaut reward!")
     
     for rewarded in rewardee:
@@ -60,10 +61,11 @@ def generate_reward_tx(rewardee):
         tx.append_create_claimable_balance_op(
             asset=asset.Asset.native(), 
             amount=str(reward),
-            claimants=[Claimant(rewarded[0])]
+            claimants=[Claimant(rewarded[0]), Claimant(PUBLIC_KEY)]
         )
 
-    xdr = tx.set_timeout(30).build().to_xdr()
+    now = int(time.time())
+    xdr = tx.add_time_bounds(now, now+24*60*60).build().to_xdr() # make valid one day from now
 
     return xdr
 
