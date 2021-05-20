@@ -13,7 +13,7 @@ NOTIFY_USER  = os.environ['NOTIFY_USER']
 async def on_ready():
     print(f'We have logged in as {client.user}')
     notify_user = await client.fetch_user(NOTIFY_USER)
-    await notify_user.send(content = await generate_report())
+    await notify_user.send(content = await generate_report(conn))
     await client.close()
 
 def start():
