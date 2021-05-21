@@ -4,4 +4,4 @@ stellar-sdk
 postbin
 psycopg2
 pip-tools
-black
+flake8
