@@ -1,10 +1,17 @@
 import discord
-from helper import fetchLeaderboard, fetchUserPubKeys, upload_to_hastebin
-from stellar_helpers import *
+
+from .database import fetchLeaderboard, fetchUserPubKeys
+from .generic import upload_to_hastebin
+from .stellar import *
+
 
 async def leaderboard(conn, client, message, LEADERBOARD_LIMIT):
     last = fetch_last_tx()
-    embed=discord.Embed(title="Leaderboard", description=f"This are currently the Results\n Last distribution was {last}", color=0x5125aa)
+    embed = discord.Embed(
+        title="Leaderboard",
+        description=f"This are currently the Results\n Last distribution was {last}",
+        color=0x5125AA,
+    )
 
     rows = fetchLeaderboard(conn, last, datetime.now())
 
@@ -12,24 +19,28 @@ async def leaderboard(conn, client, message, LEADERBOARD_LIMIT):
         embed.add_field(name="``#1`` KanayeNet", value="Even without any votes he is leading!")
 
     counter = 0
-    for row in rows: 
+    for row in rows:
         if row == None or counter == LEADERBOARD_LIMIT:
             break
 
         user = await client.fetch_user(row[0])
         embed.add_field(name=f"``#{counter+1}`` {user.name}", value=f"{row[1]} Upvotes", inline=True)
-        counter+=1
-        
+        counter += 1
+
     embed.set_footer(text="Made with love, code and Python")
-    await message.channel.send('And the results are in!', embed=embed)
+    await message.channel.send("And the results are in!", embed=embed)
+
 
 def hasRole(roles, REQUIRED_ROLE_ID):
     if discord.utils.get(roles, id=int(REQUIRED_ROLE_ID)):
         return True
     return False
 
+
 async def generate_report(conn):
-    last_tx_date = fetch_last_tx() # possible bug if last_tx_date == None => counting all votes ever <--> this should only happen when account is new
+    last_tx_date = (
+        fetch_last_tx()
+    )  # possible bug if last_tx_date == None => counting all votes ever <--> this should only happen when account is new
     leaderboard_rows = fetchLeaderboard(conn, last_tx_date, datetime.now())
     user_rows = fetchUserPubKeys(conn)
     sumVotes = 0
@@ -60,7 +71,7 @@ async def generate_report(conn):
         return "Wow! There are a lot of eligible lumenauts (>100). We should upgrade our code to handle this case..."
     payouts = []
 
-    pricepot -= len(payoutUser) # base reserve * 2 (2 claimaints for each claimableBalance)
+    pricepot -= len(payoutUser)  # base reserve * 2 (2 claimaints for each claimableBalance)
 
     if pricepot <= 0:
         return f"Balance of Pricepot is not high enough to support {len(payoutUser)} eligible lumenauts!"
@@ -68,19 +79,20 @@ async def generate_report(conn):
     for user in payoutUser:
         payout = user[1] / sumVotes * pricepot
         payouts.append((user[2], payout))
-        
+
     tx_xdr = generate_reward_tx(payouts, BASE_FEE)
 
-    if tx_xdr == None: 
+    if tx_xdr == None:
         return f"Failed to load reward account!"
 
-    return f"{tx_xdr}" #todo size limit?
+    return f"{tx_xdr}"  # todo size limit?
+
 
 async def notify_submitter(client, conn, user):
     notify_user = await client.fetch_user(user)
     content = await generate_report(conn)
-    if content.startswith('AA'): # is XDR
+    if content.startswith("AA"):  # is XDR
         content = upload_to_hastebin(content)
     else:
         content = f"```{content}```"
-    await notify_user.send(content = f"New week, new lumenaut rewards:\n{content}")
+    await notify_user.send(content=f"New week, new lumenaut rewards:\n{content}")
