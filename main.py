@@ -91,7 +91,7 @@ async def on_message(message):
 
     if message.mentions != []:
         for member in message.mentions:
-            if member.id == message.author.id and hasRole(member.roles, REQUIRED_ROLE_ID):
+            if member.id == message.author.id or not hasRole(member.roles, REQUIRED_ROLE_ID):
                 continue
             processVote(message.id, member.id, message.author.id)
 
