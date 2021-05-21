@@ -10,6 +10,16 @@ from helpers.stellar import validate_pub_key
 from helpers.discord import leaderboard, hasRole, notify_submitter
 from helpers.database import *
 
+import sentry_sdk
+
+SENTRY_ENABLED = True if not "SENTRY_ENABLED" in os.environ else bool(json.loads(os.environ["SENTRY_ENABLED"]))
+
+if SENTRY_ENABLED:
+    sentry_sdk.init(
+        os.environ["SENTRY_URL"],
+        traces_sample_rate=1.0
+    )
+
 DATABASE_NAME = "votes.db"
 REACTION_TO_COMPARE = (
     ["🐻"] if not "DISCORD_ALLOWED_REACTION" in os.environ else json.loads(os.environ["DISCORD_ALLOWED_REACTION"])
