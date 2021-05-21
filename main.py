@@ -18,7 +18,6 @@ REQUIRED_ROLE_ID = os.environ['ROLE_ID']
 NOTIFY_USER = os.environ['NOTIFY_USER']
 
 WHITELIST_CHANNELS = [] if not 'DISCORD_WHITELIST_CHANNELS' in os.environ else json.loads(os.environ['DISCORD_WHITELIST_CHANNELS'])
-SQLITE3_ENABLED = True if os.environ['SQLITE3_ENABLED'] == "True" else False
 
 if not isinstance(REACTION_TO_COMPARE, list) \
    or (
@@ -42,8 +41,10 @@ def create_connection(db_file):
     conn = None
     try:
         if SQLITE3_ENABLED:
+            print("Using sqlite3!")
             conn = sqlite3.connect(db_file)
         else:
+            print("Using postgres!")
             conn = psycopg2.connect(
               host = os.environ['POSTGRE_HOST'],
               database = os.environ['POSTGRE_DB'],
@@ -51,6 +52,7 @@ def create_connection(db_file):
               user = os.environ['POSTGRE_USER'],
               password = os.environ['POSTGRE_PASSWORD']
             )
+        print("Database connection established!")
         return conn
     except Exception as e:
         print(e)
