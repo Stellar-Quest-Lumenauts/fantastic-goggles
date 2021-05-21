@@ -131,3 +131,4 @@ dmypy.json
 votes.db
 bin/
 pyvenv.cfg
+.vscode/

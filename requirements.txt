@@ -11,6 +11,8 @@ aiohttp==3.7.4.post0
     #   aiohttp-sse-client
     #   discord.py
     #   stellar-sdk
+appdirs==1.4.4
+    # via black
 async-timeout==3.0.1
     # via
     #   aiohttp
@@ -20,6 +22,8 @@ attrs==21.2.0
     #   aiohttp
     #   aiohttp-sse-client
     #   stellar-sdk
+black==21.5b1
+    # via -r requirements.in
 certifi==2020.12.5
     # via
     #   requests
@@ -34,7 +38,9 @@ chardet==4.0.0
     #   requests
     #   stellar-sdk
 click==8.0.1
-    # via pip-tools
+    # via
+    #   black
+    #   pip-tools
 discord-py-slash-command==1.1.2
     # via -r requirements.in
 discord.py==1.7.2
@@ -56,6 +62,10 @@ multidict==5.1.0
     #   aiohttp-sse-client
     #   stellar-sdk
     #   yarl
+mypy-extensions==0.4.3
+    # via black
+pathspec==0.8.1
+    # via black
 pep517==0.10.0
     # via pip-tools
 pip-tools==6.1.0
@@ -74,6 +84,8 @@ pyflakes==2.3.1
     # via flake8
 pynacl==1.4.0
     # via stellar-sdk
+regex==2021.4.4
+    # via black
 requests==2.25.1
     # via
     #   stellar-base-sseclient
@@ -89,6 +101,7 @@ stellar-sdk==3.3.4
     # via -r requirements.in
 toml==0.10.2
     # via
+    #   black
     #   pep517
     #   stellar-sdk
 typing-extensions==3.10.0.0

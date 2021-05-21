@@ -5,3 +5,4 @@ postbin
 psycopg2
 pip-tools
 flake8
+black
