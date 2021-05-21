@@ -57,7 +57,9 @@ def generate_reward_tx(rewardee, base_fee=None):
     except:
         print(f"Error fetching base fees from networking! Defaulting to {BASE_FEE}")
     tx = TransactionBuilder(
-        source_account=source_acc, network_passphrase=STELLAR_PASSPHRASE, base_fee=fee
+        source_account=source_acc,
+        network_passphrase=STELLAR_PASSPHRASE,
+        base_fee=fee,
     ).add_text_memo("Lumenaut reward!")
 
     for rewarded in rewardee:
@@ -66,7 +68,9 @@ def generate_reward_tx(rewardee, base_fee=None):
             continue
 
         tx.append_create_claimable_balance_op(
-            asset=asset.Asset.native(), amount=str(reward), claimants=[Claimant(rewarded[0]), Claimant(PUBLIC_KEY)]
+            asset=asset.Asset.native(),
+            amount=str(reward),
+            claimants=[Claimant(rewarded[0]), Claimant(PUBLIC_KEY)],
         )
 
     now = int(time.time())
