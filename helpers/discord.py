@@ -31,10 +31,10 @@ async def leaderboard(conn, client, message, LEADERBOARD_LIMIT):
         usernames.append(user.name)
         upvotes.append(row[1])
         counter += 1
-
+    discord_file = generate_graph(usernames, upvotes)
     embed.set_image(url="attachment://graph.png")
     embed.set_footer(text="Made with love, code and Python")
-    await message.channel.send("And the results are in!", embed=embed, file=generate_graph(usernames, upvotes))
+    await message.channel.send("And the results are in!", embed=embed, file=discord_file)
 
 
 def hasRole(roles, REQUIRED_ROLE_ID):
