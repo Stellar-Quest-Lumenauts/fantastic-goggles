@@ -6,3 +6,5 @@ psycopg2
 pip-tools
 flake8
 black
+sentry-sdk
+seaborn
