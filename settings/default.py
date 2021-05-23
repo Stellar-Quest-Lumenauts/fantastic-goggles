@@ -1,9 +1,9 @@
-import environ
+import environs
 from stellar_sdk import Network
 
-env = environ.Env()
+env = environs.Env()
 
-environ.Env.read_env(".env")
+env.read_env()
 
 SQLITE3_ENABLED = env.bool("SQLITE3_ENABLED", True)
 DATABASE_NAME = env.str("DATABASE_NAME", "votes.db")
@@ -16,9 +16,9 @@ STELLAR_PASSPHRASE = Network.TESTNET_NETWORK_PASSPHRASE if STELLAR_USE_TESTNET e
 BASE_FEE = env.int("BASE_FEE", 10000)
 REWARD_PUBLIC_KEY = env.str("REWARD_PUBLIC_KEY")
 
-REACTION_TO_COMPARE = env.json("REACTION_TO_COMPARE", ["🐻"])
+REACTION_TO_COMPARE = env.json("REACTION_TO_COMPARE", '["🐻"]')
 LEADERBOARD_LIMIT = env.int("LEADERBOARD_LIMIT", 10)
 DISCORD_BOT_TOKEN = env.str("DISCORD_BOT_TOKEN")
 REQUIRED_ROLE_ID = env.int("REQUIRED_ROLE_ID")
 NOTIFY_USER = env.int("NOTIFY_USER")
-DISCORD_WHITELIST_CHANNELS = env.json("DISCORD_WHITELIST_CHANNELS", [])
+DISCORD_WHITELIST_CHANNELS = env.json("DISCORD_WHITELIST_CHANNELS", "[]")

@@ -8,6 +8,6 @@ flake8
 black
 sentry-sdk
 requests-mock
-django-environ
+environs
 coverage
 seaborn
