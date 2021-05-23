@@ -1,14 +1,17 @@
-from helper import *
+from helpers.database import *
 from main import *
-from discord_helpers import hasRole
+from helpers.discord import hasRole
+import os
+
+SERVER_ID = int(os.environ["SERVER_ID"])
 
 @client.event
 async def on_ready():
-    print(f'We have logged in as {client.user}')
+    print(f"We have logged in as {client.user}")
     leaderboard = fetchLeaderboard(conn)
     to_be_removed = []
-    guild = client.get_guild(763798356484161566)
-    
+    guild = client.get_guild(SERVER_ID)
+
     for row in leaderboard:
         if row[0] in to_be_removed:
             continue
@@ -20,20 +23,22 @@ async def on_ready():
             print(f"Found invalid user {row[0]}!")
 
         to_be_removed.append(member)
-    
+
     SQL = "WHERE false"
 
     for m in to_be_removed:
         print(m)
-        SQL +=f" OR user_id={m.id}"
-    
+        SQL += f" OR user_id={m.id}"
+
     print(SQL)
 
     await client.close()
+
 
 def start():
     setup_db(conn)
     client.run(BOT_TOKEN)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     start()
