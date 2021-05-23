@@ -32,3 +32,5 @@ jobs:
       -
         name: black
         uses: piotrpawlaczek/python-blacken@release/stable
+        with:
+          line-length: '119'
