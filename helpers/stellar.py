@@ -1,7 +1,7 @@
 import os
 import time
 from datetime import datetime
-from stellar_sdk import TransactionBuilder, Server, Network, Keypair, Account, asset
+from stellar_sdk import TransactionBuilder, Server, Network, Keypair, asset
 from stellar_sdk.operation.create_claimable_balance import Claimant
 
 STELLAR_USE_TESTNET = "USE_STELLAR_TEST_NET" in os.environ
@@ -24,7 +24,7 @@ def fetch_account_balance(pubKey: str = PUBLIC_KEY) -> float:
     """
     try:
         acc = server.accounts().account_id(PUBLIC_KEY).call()
-    except:
+    except Exception:
         print(f"Specified account ({pubKey}) does not exists")
         return 0
     balance = 0
@@ -46,15 +46,15 @@ def generate_reward_tx(rewardee, base_fee=None):
     """
     try:
         source_acc = server.load_account(PUBLIC_KEY)  # fetch sequence or will it be used with a fee bump?
-    except:
+    except Exception:
         print(f"Failed to load public reward account {PUBLIC_KEY}!")
         return None
 
     fee = BASE_FEE
 
     try:
-        fee = server.fetch_base_fee() if base_fee == None else base_fee
-    except:
+        fee = server.fetch_base_fee() if base_fee is None else base_fee
+    except Exception:
         print(f"Error fetching base fees from networking! Defaulting to {BASE_FEE}")
     tx = TransactionBuilder(
         source_account=source_acc,
@@ -100,7 +100,7 @@ def fetch_last_tx(pubKey: str = PUBLIC_KEY, memo: str = "Lumenaut reward!"):
             if records["source_account"] != pubKey:
                 continue
 
-            if memo != None and (records["memo_type"] != "text" or records["memo"] != memo):
+            if memo is not None and (records["memo_type"] != "text" or records["memo"] != memo):
                 continue
 
             created = records["created_at"]
@@ -109,7 +109,7 @@ def fetch_last_tx(pubKey: str = PUBLIC_KEY, memo: str = "Lumenaut reward!"):
                 return datetime.strptime(created, "%Y-%m-%dT%H:%M:%SZ")
             return datetime.strptime(timeBound, "%Y-%m-%dT%H:%M:%SZ")
         return None
-    except:
+    except Exception:
         return None
 
 
@@ -121,5 +121,5 @@ def validate_pub_key(pub_key: str):
     try:
         Keypair.from_public_key(pub_key)
         return True
-    except:
+    except Exception:
         return False

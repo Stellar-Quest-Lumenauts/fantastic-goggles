@@ -1,13 +1,9 @@
-import discord
 from discord.embeds import Embed
 
-from main import *
+from main import client, conn, BOT_TOKEN
 from helpers.stellar import fetch_last_tx
-from helpers.database import *
-
-intents = discord.Intents(dm_messages=True)
-client = discord.Client(intents=intents)
-conn = create_connection(DATABASE_NAME)
+from helpers.database import fetchLeaderboard, fetchUserPubKeys, setup_db
+import datetime
 
 
 async def fetch_users_missing_pub():
