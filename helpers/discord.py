@@ -1,5 +1,5 @@
 import discord
-import datetime
+#import datetime
 
 from .database import fetchLeaderboard, fetchUserPubKeys
 from .generic import upload_to_hastebin
