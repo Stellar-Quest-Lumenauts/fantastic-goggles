@@ -21,11 +21,17 @@ def setup_db(conn):
             """CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER, message_id INTEGER, backer INTEGER, vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)"""
         )
         c.execute(
+            """CREATE UNIQUE INDEX IF NOT EXISTS one_ring_rules_them_all ON votes_history(message_id, backer)"""
+        )
+        c.execute(
             """CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, stellar_account VARCHAR(56) NOT NULL ON CONFLICT REPLACE)"""
         )
     else:
         c.execute(
             """CREATE TABLE IF NOT EXISTS votes_history (id SERIAL NOT NULL PRIMARY KEY, user_id BIGINT, message_id BIGINT, backer BIGINT, vote_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)"""
+        )
+        c.execute(
+            """CREATE UNIQUE INDEX IF NOT EXISTS one_ring_rules_them_all ON votes_history(message_id, backer)"""
         )
         c.execute(
             """CREATE TABLE IF NOT EXISTS users(user_id BIGINT NOT NULL PRIMARY KEY, stellar_account VARCHAR(56) NOT NULL)"""
@@ -89,15 +95,19 @@ def updateHistory(conn, author, message_id, backer):
     Returns success
     """
     c = conn.cursor()
-    c.execute(
-        prepareQuery("INSERT INTO votes_history (user_id, message_id, backer) VALUES (?,?,?)"),
-        (
-            int(author),
-            int(message_id),
-            int(backer),
-        ),
-    )
-    conn.commit()
+    try:
+        c.execute(
+            prepareQuery("INSERT INTO votes_history (user_id, message_id, backer) VALUES (?,?,?)"),
+            (
+                int(author),
+                int(message_id),
+                int(backer),
+            ),
+        )
+        conn.commit()
+    except:
+        return False
+
     return c.rowcount > 0
 
 
