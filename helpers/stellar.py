@@ -34,7 +34,7 @@ def fetch_account_balance(pubKey: str = REWARD_PUBLIC_KEY) -> float:
             balance = float(b["balance"])
             break
 
-    balance -= 0.5 * (2 + acc["subentry_count"])  # base reserve
+    balance -= 0.5 * (2 + acc["subentry_count"] + acc["num_sponsoring"])  # base reserve
     return balance
 
 

@@ -4,6 +4,7 @@ import discord
 from .database import fetchLeaderboard, fetchUserPubKeys
 from .generic import upload_to_hastebin
 from .stellar import fetch_last_tx, fetch_account_balance, generate_reward_tx
+from .graphs import generate_graph
 from settings.default import BASE_FEE
 
 
@@ -21,16 +22,21 @@ async def leaderboard(conn, client, message, limit):
         embed.add_field(name="``#1`` KanayeNet", value="Even without any votes he is leading!")
 
     counter = 0
+    usernames = []
+    upvotes = []
     for row in rows:
         if row is None or counter == limit:
             break
 
         user = await client.fetch_user(row[0])
         embed.add_field(name=f"``#{counter+1}`` {user.name}", value=f"{row[1]} Upvotes", inline=True)
+        usernames.append(user.name)
+        upvotes.append(row[1])
         counter += 1
-
+    discord_file = generate_graph(usernames, upvotes)
+    embed.set_image(url="attachment://graph.png")
     embed.set_footer(text="Made with love, code and Python")
-    await message.channel.send("And the results are in!", embed=embed)
+    await message.channel.send("And the results are in!", embed=embed, file=discord_file)
 
 
 def hasRole(roles, REQUIRED_ROLE_ID):

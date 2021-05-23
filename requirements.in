@@ -10,3 +10,4 @@ sentry-sdk
 requests-mock
 django-environ
 coverage
+seaborn
