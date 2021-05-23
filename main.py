@@ -8,21 +8,18 @@ from discord_slash.utils.manage_commands import create_option
 
 from helpers.stellar import validate_pub_key
 from helpers.discord import leaderboard, hasRole, notify_submitter
-from helpers.database import *
+from helpers.database import SQLITE3_ENABLED, updateHistory, setup_db, linkUserPubKey
 
 import sentry_sdk
 
-SENTRY_ENABLED = True if not "SENTRY_ENABLED" in os.environ else bool(json.loads(os.environ["SENTRY_ENABLED"]))
+SENTRY_ENABLED = True if "SENTRY_ENABLED" not in os.environ else bool(json.loads(os.environ["SENTRY_ENABLED"]))
 
 if SENTRY_ENABLED:
-    sentry_sdk.init(
-        os.environ["SENTRY_URL"],
-        traces_sample_rate=1.0
-    )
+    sentry_sdk.init(os.environ["SENTRY_URL"], traces_sample_rate=1.0)
 
 DATABASE_NAME = "votes.db"
 REACTION_TO_COMPARE = (
-    ["🐻"] if not "DISCORD_ALLOWED_REACTION" in os.environ else json.loads(os.environ["DISCORD_ALLOWED_REACTION"])
+    ["🐻"] if "DISCORD_ALLOWED_REACTION" not in os.environ else json.loads(os.environ["DISCORD_ALLOWED_REACTION"])
 )
 LEADERBOARD_LIMIT = 10
 BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN"]
@@ -30,7 +27,7 @@ REQUIRED_ROLE_ID = os.environ["ROLE_ID"]
 NOTIFY_USER = os.environ["NOTIFY_USER"]
 
 WHITELIST_CHANNELS = (
-    [] if not "DISCORD_WHITELIST_CHANNELS" in os.environ else json.loads(os.environ["DISCORD_WHITELIST_CHANNELS"])
+    [] if "DISCORD_WHITELIST_CHANNELS" not in os.environ else json.loads(os.environ["DISCORD_WHITELIST_CHANNELS"])
 )
 
 if not isinstance(REACTION_TO_COMPARE, list) or (
@@ -101,7 +98,7 @@ async def on_message(message):
         print("We were asked to manually run the distribution script")
         await notify_submitter(client, conn, NOTIFY_USER)
 
-    if not message.channel.id in WHITELIST_CHANNELS and len(WHITELIST_CHANNELS) != 0:
+    if message.channel.id not in WHITELIST_CHANNELS and len(WHITELIST_CHANNELS) != 0:
         return
 
     if message.mentions != []:
@@ -115,7 +112,7 @@ async def on_message(message):
 async def on_reaction_add(reaction, user):
     channel = reaction.message.channel
 
-    if not channel.id in WHITELIST_CHANNELS and len(WHITELIST_CHANNELS) != 0:
+    if channel.id not in WHITELIST_CHANNELS and len(WHITELIST_CHANNELS) != 0:
         return
 
     if (

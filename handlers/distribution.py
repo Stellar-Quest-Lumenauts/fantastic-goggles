@@ -1,13 +1,9 @@
 import os
-import discord
 
-from main import *
+from main import conn, client, BOT_TOKEN
 from helpers.discord import notify_submitter
-from helpers.database import *
+from helpers.database import setup_db
 
-intents = discord.Intents(dm_messages=True)
-client = discord.Client(intents=intents)
-conn = create_connection(DATABASE_NAME)
 NOTIFY_USER = os.environ["NOTIFY_USER"]
 
 

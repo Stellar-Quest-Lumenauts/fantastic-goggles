@@ -2,14 +2,14 @@ from datetime import datetime
 import json
 import os
 
-SQLITE3_ENABLED = True if not "SQLITE3_ENABLED" in os.environ else bool(json.loads(os.environ["SQLITE3_ENABLED"]))
+SQLITE3_ENABLED = True if "SQLITE3_ENABLED" not in os.environ else bool(json.loads(os.environ["SQLITE3_ENABLED"]))
 
 
 def prepareQuery(query):
     """
     Parse for SQLITE3 or Postgress
     """
-    if SQLITE3_ENABLED == False:
+    if SQLITE3_ENABLED is False:
         return query.replace("?", "%s")
     return query
 
@@ -18,17 +18,21 @@ def setup_db(conn):
     c = conn.cursor()
     if SQLITE3_ENABLED:
         c.execute(
-            """CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER, message_id INTEGER, backer INTEGER, vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)"""
+            """CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER, \
+                message_id INTEGER, backer INTEGER, vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)"""
         )
         c.execute(
-            """CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, stellar_account VARCHAR(56) NOT NULL ON CONFLICT REPLACE)"""
+            """CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, \
+                stellar_account VARCHAR(56) NOT NULL ON CONFLICT REPLACE)"""
         )
     else:
         c.execute(
-            """CREATE TABLE IF NOT EXISTS votes_history (id SERIAL NOT NULL PRIMARY KEY, user_id BIGINT, message_id BIGINT, backer BIGINT, vote_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)"""
+            """CREATE TABLE IF NOT EXISTS votes_history (id SERIAL NOT NULL PRIMARY KEY, user_id BIGINT, \
+                message_id BIGINT, backer BIGINT, vote_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)"""
         )
         c.execute(
-            """CREATE TABLE IF NOT EXISTS users(user_id BIGINT NOT NULL PRIMARY KEY, stellar_account VARCHAR(56) NOT NULL)"""
+            """CREATE TABLE IF NOT EXISTS users(user_id BIGINT NOT NULL PRIMARY KEY, \
+                stellar_account VARCHAR(56) NOT NULL)"""
         )
 
 
@@ -42,7 +46,8 @@ def linkUserPubKey(conn, user, key):
         c.execute("INSERT INTO users(user_id, stellar_account) VALUES (?, ?)", (int(user), str(key)))
     else:
         c.execute(
-            "INSERT INTO users(user_id, stellar_account) VALUES (%s, %s) ON CONFLICT (user_id) DO UPDATE SET stellar_account=%s",
+            """INSERT INTO users(user_id, stellar_account) VALUES (%s, %s) \
+                ON CONFLICT (user_id) DO UPDATE SET stellar_account=%s""",
             (int(user), str(key), str(key)),
         )
         pass
@@ -59,7 +64,7 @@ def getUserPubKey(conn, user):
     c.execute(prepareQuery("SELECT stellar_account FROM users WHERE user_id=?"), (int(user)))
     row = c.fetchone()
 
-    if row == None:
+    if row is None:
         return None
     return row[0]
 
@@ -107,7 +112,7 @@ def removeHistory(conn, message_id, author=None, backer=None):
     Returns success
     """
     c = conn.cursor()
-    if backer != None and author != None:
+    if backer is not None and author is not None:
         c.execute(
             prepareQuery("DELETE FROM votes_history WHERE user_id=? AND message_id=? AND backer=?"),
             (
@@ -126,15 +131,16 @@ def fetchLeaderboard(conn, dateFrom=None, dateTo=None):
     """
     Returns the current leaderboard
     """
-    if dateFrom == None:
+    if dateFrom is None:
         dateFrom = datetime.utcfromtimestamp(0)
-    if dateTo == None:
+    if dateTo is None:
         dateTo = datetime.now()
 
     c = conn.cursor()
     c.execute(
         prepareQuery(
-            "SELECT user_id, COUNT(user_id) as votes FROM votes_history WHERE vote_time >= ? AND vote_time <= ? GROUP BY user_id ORDER by votes DESC"
+            """SELECT user_id, COUNT(user_id) as votes FROM votes_history \
+                WHERE vote_time >= ? AND vote_time <= ? GROUP BY user_id ORDER by votes DESC"""
         ),
         (dateFrom, dateTo),
     )

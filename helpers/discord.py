@@ -1,9 +1,10 @@
 import discord
+import datetime
 
 from .database import fetchLeaderboard, fetchUserPubKeys
 from .generic import upload_to_hastebin
 from .graphs import generate_graph
-from .stellar import *
+from .stellar import fetch_account_balance, fetch_last_tx, BASE_FEE, generate_reward_tx
 
 
 async def leaderboard(conn, client, message, LEADERBOARD_LIMIT):
@@ -23,7 +24,7 @@ async def leaderboard(conn, client, message, LEADERBOARD_LIMIT):
     usernames = []
     upvotes = []
     for row in rows:
-        if row == None or counter == LEADERBOARD_LIMIT:
+        if row is None or counter is LEADERBOARD_LIMIT:
             break
 
         user = await client.fetch_user(row[0])
@@ -44,9 +45,10 @@ def hasRole(roles, REQUIRED_ROLE_ID):
 
 
 async def generate_report(conn):
-    last_tx_date = (
-        fetch_last_tx()
-    )  # possible bug if last_tx_date == None => counting all votes ever <--> this should only happen when account is new
+    last_tx_date = fetch_last_tx()
+    # possible bug if last_tx_date == None =>
+    # counting all votes ever <--> this should only happen when account is new
+
     leaderboard_rows = fetchLeaderboard(conn, last_tx_date, datetime.now())
     user_rows = fetchUserPubKeys(conn)
     sumVotes = 0
@@ -60,7 +62,7 @@ async def generate_report(conn):
             if user[0] == row[0]:
                 pubKey = user[1]
 
-        if pubKey != None:
+        if pubKey is not None:
             # user has public key
             sumVotes += row[1]
             payoutUser.append((row[0], row[1], pubKey))
@@ -88,8 +90,8 @@ async def generate_report(conn):
 
     tx_xdr = generate_reward_tx(payouts, BASE_FEE)
 
-    if tx_xdr == None:
-        return f"Failed to load reward account!"
+    if tx_xdr is None:
+        return "Failed to load reward account!"
 
     return f"{tx_xdr}"  # todo size limit?
 
