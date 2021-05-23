@@ -1,7 +1,7 @@
 name: Lint
 
 on:
-  push:
+  pull_request:
     paths:
       - '*.py'
       - '.github/workflows/lint.yml'
@@ -29,8 +29,3 @@ jobs:
           checkName: 'linting'   # NOTE: this needs to be the same as the job name
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      -
-        name: black
-        uses: piotrpawlaczek/python-blacken@release/stable
-        with:
-          line-length: '119'
