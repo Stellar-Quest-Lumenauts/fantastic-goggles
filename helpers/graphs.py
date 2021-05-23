@@ -17,6 +17,7 @@ def generate_graph(usernames, upvotes):
     ax.set(xlabel="Username", ylabel="Upvotes", title="Upvote Distribution")
 
     data_stream = io.BytesIO()
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=40, ha="right")
     plt.savefig(data_stream, format="png", bbox_inches="tight", dpi=80)
     data_stream.seek(0)
 
