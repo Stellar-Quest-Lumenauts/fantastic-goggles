@@ -68,6 +68,10 @@ def setup_db(conn: Connection) -> None:
             """
         )
 
+    c.execute(
+        """CREATE UNIQUE INDEX IF NOT EXISTS one_ring_rules_them_all ON votes_history(message_id, backer)"""
+    )
+
 
 def linkUserPubKey(conn: Connection, user: str, key: str) -> bool:
     """
@@ -138,15 +142,19 @@ def updateHistory(conn: Connection, author: str, message_id: str, backer: str) -
     Returns success
     """
     c = conn.cursor()
-    c.execute(
-        prepareQuery("INSERT INTO votes_history (user_id, message_id, backer) VALUES (?,?,?)"),
-        (
-            int(author),
-            int(message_id),
-            int(backer),
-        ),
-    )
-    conn.commit()
+    try:
+        c.execute(
+            prepareQuery("INSERT INTO votes_history (user_id, message_id, backer) VALUES (?,?,?)"),
+            (
+                int(author),
+                int(message_id),
+                int(backer),
+            ),
+        )
+        conn.commit()
+    except Exception:
+        return False
+
     return c.rowcount > 0
 
 

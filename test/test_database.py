@@ -50,7 +50,7 @@ class DatabaseTest(TestCase):
     def test_leaderboard(self):
         updateHistory(self.conn, "1234", "4567", "7890")
         updateHistory(self.conn, "1234", "3456", "7890")
-        updateHistory(self.conn, "2233", "4567", "7890")
+        updateHistory(self.conn, "2233", "4568", "7890")
         res = fetchLeaderboard(self.conn)
         self.assertEqual(len(res), 2)
 
@@ -58,3 +58,9 @@ class DatabaseTest(TestCase):
         updateHistory(self.conn, "1234", "4567", "7890")
         res = queryHistory(self.conn, "4567")
         self.assertEqual(res[0], 1234)
+
+    def test_unique(self):
+        self.assertTrue(updateHistory(self.conn, "1234", "4567", "7890"))
+        self.assertFalse(updateHistory(self.conn, "1234", "4567", "7890"))
+        self.assertTrue(updateHistory(self.conn, "1234", "1111", "7890"))
+        self.assertTrue(updateHistory(self.conn, "1234", "4567", "7891"))
