@@ -1,12 +1,12 @@
-from helpers.database import *
-from main import *
-from helpers.discord import hasRole
-import os
-
 """
 This script will search through the database and select all users without the required discord role
 to print them and create a SQL-`WHERE` selector. 
 """
+
+from helpers.database import *
+from main import *
+from helpers.discord import hasRole
+import os
 
 SERVER_ID = int(os.environ["SERVER_ID"])
 
