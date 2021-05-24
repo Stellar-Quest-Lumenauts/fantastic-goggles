@@ -46,7 +46,8 @@ def hasRole(roles, REQUIRED_ROLE_ID):
 
 
 def generate_payouts(conn):
-    # possible bug if last_tx_date == None => counting all votes ever <--> this should only happen when account is new
+    # possible bug if last_tx_date == None =>
+    # counting all votes ever <--> this should only happen when account is new
     last_tx_date = fetch_last_tx()
     leaderboard_rows = fetchLeaderboard(conn, last_tx_date, datetime.now())
     user_rows = fetchUserPubKeys(conn)
