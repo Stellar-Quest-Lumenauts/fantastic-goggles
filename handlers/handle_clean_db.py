@@ -3,12 +3,11 @@ This script will search through the database and select all users without the re
 to print them and create a SQL-`WHERE` selector. 
 """
 
-from helpers.database import *
+from helpers.database import fetchLeaderboard
 from main import *
 from helpers.discord import hasRole
 import os
-
-SERVER_ID = int(os.environ["SERVER_ID"])
+from settings.default import DISCORD_BOT_TOKEN, DISCORD_SERVER_ID
 
 
 @client.event
@@ -16,7 +15,7 @@ async def on_ready():
     print(f"We have logged in as {client.user}")
     leaderboard = fetchLeaderboard(conn)
     to_be_removed = []
-    guild = client.get_guild(SERVER_ID)
+    guild = client.get_guild(DISCORD_SERVER_ID)
 
     for row in leaderboard:
         if row[0] in to_be_removed:
@@ -43,7 +42,7 @@ async def on_ready():
 
 def start():
     setup_db(conn)
-    client.run(BOT_TOKEN)
+    client.run(DISCORD_BOT_TOKEN)
 
 
 if __name__ == "__main__":
