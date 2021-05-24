@@ -125,7 +125,7 @@ async def _my_pub_key(ctx):
     if public_key is not None:
         await ctx.send(f"Your account is associated with the following public_key {public_key}")
     else:
-        await ctx.send("Your account has not been found. Use `/set public_key` to add it to the database.")
+        await ctx.send("Your account has not been found. Use `/link public_key` to add it to the database.")
 
 
 if __name__ == "__main__":
