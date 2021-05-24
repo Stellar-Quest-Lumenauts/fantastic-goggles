@@ -7,4 +7,7 @@ pip-tools
 flake8
 black
 sentry-sdk
+requests-mock
+environs
+coverage
 seaborn
