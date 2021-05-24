@@ -8,7 +8,8 @@ env.read_env()
 SQLITE3_ENABLED = env.bool("SQLITE3_ENABLED", True)
 DATABASE_NAME = env.str("DATABASE_NAME", "votes.db")
 
-SENTRY_ENABLED = env.bool("SENTRY_ENABLED", True)
+SENTRY_ENABLED = env.bool("SENTRY_ENABLED", False)
+SENTRY_URL = env.str("SENTRY_URL", "")
 
 STELLAR_USE_TESTNET = env.bool("STELLAR_USE_TESTNET", False)
 STELLAR_ENDPOINT = "https://horizon-testnet.stellar.org" if STELLAR_USE_TESTNET else "https://horizon.stellar.org"
