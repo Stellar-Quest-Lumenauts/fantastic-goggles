@@ -1,4 +1,3 @@
-import os
 import discord
 from discord_slash import SlashCommand
 from discord_slash.utils.manage_commands import create_option
@@ -9,6 +8,7 @@ from helpers.discord import leaderboard, hasRole, notify_submitter
 from helpers.database import updateHistory, linkUserPubKey, setup_db, create_connection
 from settings.default import (
     SENTRY_ENABLED,
+    SENTRY_URL,
     REACTION_TO_COMPARE,
     DISCORD_WHITELIST_CHANNELS,
     DATABASE_NAME,
@@ -19,7 +19,7 @@ from settings.default import (
 )
 
 if SENTRY_ENABLED:
-    sentry_sdk.init(os.environ["SENTRY_URL"], traces_sample_rate=1.0)
+    sentry_sdk.init(SENTRY_URL, traces_sample_rate=1.0)
 
 if not isinstance(REACTION_TO_COMPARE, list) or (
     len(REACTION_TO_COMPARE) != 0 and not isinstance(REACTION_TO_COMPARE[0], str)
