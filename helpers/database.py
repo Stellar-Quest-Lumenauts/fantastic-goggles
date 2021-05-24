@@ -68,9 +68,9 @@ def setup_db(conn: Connection) -> None:
             """
         )
 
-    c.execute(
-        """CREATE UNIQUE INDEX IF NOT EXISTS one_ring_rules_them_all ON votes_history(message_id, backer)"""
-    )
+    #c.execute(
+    #    """CREATE UNIQUE INDEX IF NOT EXISTS one_ring_rules_them_all ON votes_history(message_id, backer)"""
+    #)
 
 
 def linkUserPubKey(conn: Connection, user: str, key: str) -> bool:
