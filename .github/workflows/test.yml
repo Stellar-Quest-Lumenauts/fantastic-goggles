@@ -5,6 +5,13 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # Minimum fake env to run the tests
+      REWARD_PUBLIC_KEY: GBVN6V7CP66EFUBPVNVLCOMJ52UWSCT5D4G7IUS64LNWRJN6XZQMQTOV
+      DISCORD_BOT_TOKEN: blah
+      DISCORD_WHITELIST_CHANNELS: "[1234, 5678, 9012]"
+      REQUIRED_ROLE_ID: 1234
+      NOTIFY_USER: 1234
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
