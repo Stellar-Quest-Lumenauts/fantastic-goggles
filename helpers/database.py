@@ -49,9 +49,6 @@ def setup_db(conn: Connection) -> None:
             """
         )
         c.execute(
-            """CREATE UNIQUE INDEX IF NOT EXISTS one_ring_rules_them_all ON votes_history(message_id, backer)"""
-        )
-        c.execute(
             """
             CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, stellar_account VARCHAR(56) NOT NULL
             ON CONFLICT REPLACE)
@@ -65,14 +62,15 @@ def setup_db(conn: Connection) -> None:
             """
         )
         c.execute(
-            """CREATE UNIQUE INDEX IF NOT EXISTS one_ring_rules_them_all ON votes_history(message_id, backer)"""
-        )
-        c.execute(
             """
             CREATE TABLE IF NOT EXISTS users(user_id BIGINT NOT NULL PRIMARY KEY,
             stellar_account VARCHAR(56) NOT NULL)
             """
         )
+
+    c.execute(
+        """CREATE UNIQUE INDEX IF NOT EXISTS one_ring_rules_them_all ON votes_history(message_id, backer)"""
+    )
 
 
 def linkUserPubKey(conn: Connection, user: str, key: str) -> bool:
@@ -154,7 +152,7 @@ def updateHistory(conn: Connection, author: str, message_id: str, backer: str) -
             ),
         )
         conn.commit()
-    except:
+    except Exception:
         return False
 
     return c.rowcount > 0
