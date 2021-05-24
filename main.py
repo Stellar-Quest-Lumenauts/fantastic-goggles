@@ -114,6 +114,7 @@ async def _link_reward(ctx, public_key: str):
         else:
             await ctx.send("Unknown error linking your public key! Please ask somewhere...")
             
+            
 @slash.slash(
     name="my_public_key",
     description="Display your public key",
@@ -125,6 +126,7 @@ async def _my_pub_key(ctx):
         await ctx.send(f"Your account is associated with the following public_key {public_key}")
     else:
         await ctx.send("Your account has not been found. Use `/set public_key` to add it to the database.")
+        
 
 if __name__ == "__main__":
     setup_db(conn)
