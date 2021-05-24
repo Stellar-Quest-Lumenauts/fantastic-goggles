@@ -120,8 +120,8 @@ async def _link_reward(ctx, public_key: str):
     description="Display your public key",
 )
 async def _my_pub_key(ctx):
-    public_key = getUserPubKey(conn, ctx.author_id):
-        
+    public_key = getUserPubKey(conn, ctx.author_id)
+
     if public_key is not None:
         await ctx.send(f"Your account is associated with the following public_key {public_key}")
     else:
