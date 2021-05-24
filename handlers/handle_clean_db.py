@@ -1,13 +1,12 @@
 """
 This script will search through the database and select all users without the required discord role
-to print them and create a SQL-`WHERE` selector. 
+to print them and create a SQL-`WHERE` selector.
 """
 
-from helpers.database import fetchLeaderboard
-from main import *
+from helpers.database import fetchLeaderboard, setup_db
+from main import conn, client
 from helpers.discord import hasRole
-import os
-from settings.default import DISCORD_BOT_TOKEN, DISCORD_SERVER_ID
+from settings.default import DISCORD_BOT_TOKEN, DISCORD_SERVER_ID, REQUIRED_ROLE_ID
 
 
 @client.event
@@ -24,7 +23,7 @@ async def on_ready():
             member = guild.get_member(row[0])
             if hasRole(member.roles, REQUIRED_ROLE_ID):
                 continue
-        except:
+        except Exception:
             print(f"Found invalid user {row[0]}!")
 
         to_be_removed.append(member)
