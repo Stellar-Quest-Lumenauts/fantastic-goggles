@@ -1,12 +1,22 @@
+from datetime import datetime
+import discord
 from discord.embeds import Embed
 
-from main import client, conn, BOT_TOKEN
 from helpers.stellar import fetch_last_tx
-from helpers.database import fetchLeaderboard, fetchUserPubKeys, setup_db
-import datetime
+from helpers.database import (
+    fetchLeaderboard,
+    fetchUserPubKeys,
+    setup_db,
+    create_connection,
+)
+from settings.default import DATABASE_NAME, DISCORD_BOT_TOKEN
+
+intents = discord.Intents(dm_messages=True)
+client = discord.Client(intents=intents)
+conn = create_connection(DATABASE_NAME)
 
 
-async def fetch_users_missing_pub():
+async def fetch_users_missing_pub(conn=conn):
     """
     Fetches all users still missing an public key for reward distribution
     returns array of tuples (user_id, potential_votes)
@@ -49,7 +59,7 @@ Use `/link <public_key>` now to connect your public-net stellar account!\
 
 def start():
     setup_db(conn)
-    client.run(BOT_TOKEN)
+    client.run(DISCORD_BOT_TOKEN)
 
 
 if __name__ == "__main__":

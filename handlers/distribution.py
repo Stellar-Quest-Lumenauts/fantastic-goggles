@@ -1,10 +1,12 @@
-import os
+import discord
 
-from main import conn, client, BOT_TOKEN
 from helpers.discord import notify_submitter
-from helpers.database import setup_db
+from helpers.database import setup_db, create_connection
+from settings.default import DISCORD_BOT_TOKEN, DATABASE_NAME, NOTIFY_USER
 
-NOTIFY_USER = os.environ["NOTIFY_USER"]
+intents = discord.Intents(dm_messages=True)
+client = discord.Client(intents=intents)
+conn = create_connection(DATABASE_NAME)
 
 
 @client.event
@@ -16,7 +18,7 @@ async def on_ready():
 
 def start():
     setup_db(conn)
-    client.run(BOT_TOKEN)
+    client.run(DISCORD_BOT_TOKEN)
 
 
 if __name__ == "__main__":

@@ -1,34 +1,25 @@
-import sqlite3
-import psycopg2
-import os
-import json
 import discord
 from discord_slash import SlashCommand
 from discord_slash.utils.manage_commands import create_option
+import sentry_sdk
 
 from helpers.stellar import validate_pub_key
 from helpers.discord import leaderboard, hasRole, notify_submitter
-from helpers.database import SQLITE3_ENABLED, updateHistory, setup_db, linkUserPubKey
-
-import sentry_sdk
-
-SENTRY_ENABLED = True if "SENTRY_ENABLED" not in os.environ else bool(json.loads(os.environ["SENTRY_ENABLED"]))
+from helpers.database import updateHistory, linkUserPubKey, setup_db, create_connection
+from settings.default import (
+    SENTRY_ENABLED,
+    SENTRY_URL,
+    REACTION_TO_COMPARE,
+    DISCORD_WHITELIST_CHANNELS,
+    DATABASE_NAME,
+    LEADERBOARD_LIMIT,
+    NOTIFY_USER,
+    REQUIRED_ROLE_ID,
+    DISCORD_BOT_TOKEN,
+)
 
 if SENTRY_ENABLED:
-    sentry_sdk.init(os.environ["SENTRY_URL"], traces_sample_rate=1.0)
-
-DATABASE_NAME = "votes.db"
-REACTION_TO_COMPARE = (
-    ["🐻"] if "DISCORD_ALLOWED_REACTION" not in os.environ else json.loads(os.environ["DISCORD_ALLOWED_REACTION"])
-)
-LEADERBOARD_LIMIT = 10
-BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN"]
-REQUIRED_ROLE_ID = os.environ["ROLE_ID"]
-NOTIFY_USER = os.environ["NOTIFY_USER"]
-
-WHITELIST_CHANNELS = (
-    [] if "DISCORD_WHITELIST_CHANNELS" not in os.environ else json.loads(os.environ["DISCORD_WHITELIST_CHANNELS"])
-)
+    sentry_sdk.init(SENTRY_URL, traces_sample_rate=1.0)
 
 if not isinstance(REACTION_TO_COMPARE, list) or (
     len(REACTION_TO_COMPARE) != 0 and not isinstance(REACTION_TO_COMPARE[0], str)
@@ -36,34 +27,12 @@ if not isinstance(REACTION_TO_COMPARE, list) or (
     # REACTION_TO_COMPARE must be str to arr of str; empty array => wildcard
     print("DISCORD_ALLOWED_REACTION env variable has to be array of strs!")
     exit
-if not isinstance(WHITELIST_CHANNELS, list) or (
-    len(WHITELIST_CHANNELS) != 0 and not isinstance(WHITELIST_CHANNELS[0], int)
+if not isinstance(DISCORD_WHITELIST_CHANNELS, list) or (
+    len(DISCORD_WHITELIST_CHANNELS) != 0 and not isinstance(DISCORD_WHITELIST_CHANNELS[0], int)
 ):
     # IGNORE_CHANNELS must be array of ints
     print("DISCORD_WHITELIST_CHANNELS env variable has to be array of ints!")
     exit
-
-
-def create_connection(db_file):
-    """create a database connection to a SQLite database"""
-    conn = None
-    try:
-        if SQLITE3_ENABLED:
-            print("Using sqlite3!")
-            conn = sqlite3.connect(db_file)
-        else:
-            print("Using postgres!")
-            conn = psycopg2.connect(
-                host=os.environ["POSTGRE_HOST"],
-                database=os.environ["POSTGRE_DB"],
-                port=os.environ["POSTGRE_PORT"],
-                user=os.environ["POSTGRE_USER"],
-                password=os.environ["POSTGRE_PASSWORD"],
-            )
-        print("Database connection established!")
-        return conn
-    except Exception as e:
-        print(e)
 
 
 intents = discord.Intents(messages=True, guilds=True, members=True, reactions=True)
@@ -98,7 +67,7 @@ async def on_message(message):
         print("We were asked to manually run the distribution script")
         await notify_submitter(client, conn, NOTIFY_USER)
 
-    if message.channel.id not in WHITELIST_CHANNELS and len(WHITELIST_CHANNELS) != 0:
+    if message.channel.id not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
         return
 
     if message.mentions != []:
@@ -112,7 +81,7 @@ async def on_message(message):
 async def on_reaction_add(reaction, user):
     channel = reaction.message.channel
 
-    if channel.id not in WHITELIST_CHANNELS and len(WHITELIST_CHANNELS) != 0:
+    if channel.id not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
         return
 
     if (
@@ -127,7 +96,14 @@ async def on_reaction_add(reaction, user):
 @slash.slash(
     name="link",
     description="Link your public key",
-    options=[create_option(name="public_key", description="public-net public key", option_type=3, required=True)],
+    options=[
+        create_option(
+            name="public_key",
+            description="public-net public key",
+            option_type=3,
+            required=True,
+        )
+    ],
 )
 async def _link_reward(ctx, public_key: str):
     if not validate_pub_key(public_key):
@@ -141,4 +117,4 @@ async def _link_reward(ctx, public_key: str):
 
 if __name__ == "__main__":
     setup_db(conn)
-    client.run(BOT_TOKEN)
+    client.run(DISCORD_BOT_TOKEN)
