@@ -5,7 +5,7 @@ import sentry_sdk
 
 from helpers.stellar import validate_pub_key
 from helpers.discord import leaderboard, hasRole, notify_submitter
-from helpers.database import updateHistory, linkUserPubKey, setup_db, create_connection
+from helpers.database import updateHistory, linkUserPubKey, setup_db, create_connection, getUserPubKey
 from settings.default import (
     SENTRY_ENABLED,
     SENTRY_URL,
@@ -113,6 +113,19 @@ async def _link_reward(ctx, public_key: str):
             await ctx.send(f"Linked `{public_key}` to your discord account!")
         else:
             await ctx.send("Unknown error linking your public key! Please ask somewhere...")
+
+
+@slash.slash(
+    name="my_public_key",
+    description="Display your public key",
+)
+async def _my_pub_key(ctx):
+    public_key = getUserPubKey(conn, ctx.author_id)
+
+    if public_key is not None:
+        await ctx.send(f"Your account is associated with the following public_key {public_key}")
+    else:
+        await ctx.send("Your account has not been found. Use `/link public_key` to add it to the database.")
 
 
 if __name__ == "__main__":
