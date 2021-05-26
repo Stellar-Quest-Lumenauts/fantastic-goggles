@@ -9,7 +9,7 @@ from helpers.database import updateHistory, linkUserPubKey, setup_db, create_con
 from settings.default import (
     SENTRY_ENABLED,
     SENTRY_URL,
-    REACTION_TO_COMPARE,
+    DISCORD_ALLOWED_REACTION,
     DISCORD_WHITELIST_CHANNELS,
     DATABASE_NAME,
     LEADERBOARD_LIMIT,
@@ -21,8 +21,8 @@ from settings.default import (
 if SENTRY_ENABLED:
     sentry_sdk.init(SENTRY_URL, traces_sample_rate=1.0)
 
-if not isinstance(REACTION_TO_COMPARE, list) or (
-    len(REACTION_TO_COMPARE) != 0 and not isinstance(REACTION_TO_COMPARE[0], str)
+if not isinstance(DISCORD_ALLOWED_REACTION, list) or (
+    len(DISCORD_ALLOWED_REACTION) != 0 and not isinstance(DISCORD_ALLOWED_REACTION[0], str)
 ):
     # REACTION_TO_COMPARE must be str to arr of str; empty array => wildcard
     print("DISCORD_ALLOWED_REACTION env variable has to be array of strs!")
@@ -85,7 +85,7 @@ async def on_reaction_add(reaction, user):
         return
 
     if (
-        (reaction.emoji in REACTION_TO_COMPARE or len(REACTION_TO_COMPARE) == 0)
+        (reaction.emoji in DISCORD_ALLOWED_REACTION or len(DISCORD_ALLOWED_REACTION) == 0)
         and user.id != reaction.message.author.id
         and hasRole(reaction.message.author.roles, REQUIRED_ROLE_ID)
         and user.id != client.user.id
