@@ -124,13 +124,15 @@ async def _my_pub_key(ctx):
     else:
         await ctx.send("Your account has not been found. Use `/link public_key` to add it to the database.")
 
+
 @slash.slash(
     name="hello",
     description="Replies hello",
 )
 async def _hello(ctx):
     await ctx.send("Hello!")
-        
+
+
 if __name__ == "__main__":
     setup_db(conn)
     client.run(DISCORD_BOT_TOKEN)
