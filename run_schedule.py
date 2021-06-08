@@ -9,10 +9,10 @@ if __name__ != "__main__":
 
 day = datetime.now().weekday()
 
-if day == 1:  # Monday
+if day == 7:  # Sunday
     print("Weekly reward distribution!")
     distribution.start()
-elif day == 7:  # Sunday
+elif day == 6:  # Saturday
     print("Reminding lumenauts to set their account!")
     account_missing_warning.start()
 else:
