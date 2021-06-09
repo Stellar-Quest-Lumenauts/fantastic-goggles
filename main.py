@@ -57,9 +57,6 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith("$hello"):
-        await message.channel.send("Hello!")
-
     if message.content.startswith("$$leaderboard"):
         await leaderboard(conn, client, message, LEADERBOARD_LIMIT)
 
@@ -126,6 +123,14 @@ async def _my_pub_key(ctx):
         await ctx.send(f"Your account is associated with the following public_key {public_key}")
     else:
         await ctx.send("Your account has not been found. Use `/link public_key` to add it to the database.")
+
+
+@slash.slash(
+    name="hello",
+    description="Replies hello",
+)
+async def _hello(ctx):
+    await ctx.send("Hello!")
 
 
 if __name__ == "__main__":
