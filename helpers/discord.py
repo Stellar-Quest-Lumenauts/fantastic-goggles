@@ -44,6 +44,7 @@ def hasRole(roles, REQUIRED_ROLE_ID):
     roles = [int(role) for role in roles]
     return REQUIRED_ROLE_ID in roles
 
+
 def generate_payouts(conn):
     # possible bug if last_tx_date == None =>
     # counting all votes ever <--> this should only happen when account is new
