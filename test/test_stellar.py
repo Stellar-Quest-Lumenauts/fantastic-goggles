@@ -56,7 +56,7 @@ class StellarTest(TestCase):
             json=self.TRANSACTIONS,
         )
         last_tx = fetch_last_tx()
-        self.assertEqual(last_tx, datetime(2022, 11, 1))
+        self.assertEqual(last_tx, datetime(2021, 5, 20))
 
     def test_validate_pub_key(self):
         self.assertTrue(validate_pub_key("GDQF4DKCL5APB4EDWJY5CJHMB2GLAAYJPO4QDOVEQO624LJ5BIVQS6C7"))
