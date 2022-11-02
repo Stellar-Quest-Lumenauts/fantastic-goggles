@@ -87,7 +87,7 @@ def fetch_last_tx(pubKey: str = REWARD_PUBLIC_KEY, memo: str = "Lumenaut reward!
             .for_account(pubKey)
             .include_failed(False)
             .limit(200)
-            .order("desc")
+            .order(desc=True)
             .call()["_embedded"]["records"]
         )
 

@@ -1,5 +1,5 @@
 from datetime import datetime
-import discord
+from interactions import Embed
 
 from .database import fetchLeaderboard, fetchUserPubKeys
 from .generic import upload_to_hastebin, post_to_refractor
@@ -10,7 +10,7 @@ from settings.default import BASE_FEE, USE_REFRACTOR
 
 async def leaderboard(conn, client, message, limit):
     last = fetch_last_tx()
-    embed = discord.Embed(
+    embed = Embed(
         title="Leaderboard",
         description=f"This are currently the Results\n Last distribution was {last}",
         color=0x5125AA,
@@ -36,13 +36,13 @@ async def leaderboard(conn, client, message, limit):
     discord_file = generate_graph(usernames, upvotes)
     embed.set_image(url="attachment://graph.png")
     embed.set_footer(text="Made with love, code and Python")
-    await message.channel.send("And the results are in!", embed=embed, file=discord_file)
+    channel = await message.get_channel()
+    await channel.send("And the results are in!", embeds=[embed], files=discord_file)
 
 
 def hasRole(roles, REQUIRED_ROLE_ID):
-    if discord.utils.get(roles, id=int(REQUIRED_ROLE_ID)):
-        return True
-    return False
+    roles = [int(role) for role in roles]
+    return REQUIRED_ROLE_ID in roles
 
 
 def generate_payouts(conn):

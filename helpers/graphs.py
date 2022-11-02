@@ -1,6 +1,6 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
-import discord
+from interactions import File
 import io
 
 
@@ -22,4 +22,4 @@ def generate_graph(usernames, upvotes):
     data_stream.seek(0)
 
     plt.close()
-    return discord.File(data_stream, filename="graph.png")
+    return File(filename="graph.png", fp=data_stream)
