@@ -105,8 +105,7 @@ def fetch_last_tx(pubKey: str = REWARD_PUBLIC_KEY, memo: str = "Lumenaut reward!
                 return datetime.strptime(created, "%Y-%m-%dT%H:%M:%SZ")
             return datetime.strptime(timeBound, "%Y-%m-%dT%H:%M:%SZ")
         return None
-    except Exception as e:
-        print(e)
+    except Exception:
         return None
 
 
