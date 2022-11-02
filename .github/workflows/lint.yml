@@ -12,12 +12,12 @@ jobs:
     steps:
       -
         name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.9.5
+          python-version: 3.10.8
           architecture: x64
       -
-        name: Checkout PyTorch
+        name: Checkout Fantastic Googles
         uses: actions/checkout@master
       -
         name: Install flake8
