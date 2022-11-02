@@ -1,6 +1,4 @@
-import discord
-from discord_slash import SlashCommand
-from discord_slash.utils.manage_commands import create_option
+from interactions import Client, Intents, Option, OptionType, CommandContext, ClientPresence, StatusType
 import sentry_sdk
 
 from helpers.stellar import validate_pub_key
@@ -35,9 +33,8 @@ if not isinstance(DISCORD_WHITELIST_CHANNELS, list) or (
     exit
 
 
-intents = discord.Intents(messages=True, guilds=True, members=True, reactions=True)
-client = discord.Client(intents=intents)
-slash = SlashCommand(client, sync_commands=True)
+client = Client(token=DISCORD_BOT_TOKEN, intents=Intents.GUILD_MESSAGES | Intents.DIRECT_MESSAGES | Intents.GUILD_MESSAGE_REACTIONS | Intents.GUILD_MESSAGE_CONTENT)
+print(client._intents)
 conn = create_connection(DATABASE_NAME)
 
 
@@ -48,17 +45,18 @@ def processVote(message_id, author, backer):
 
 @client.event
 async def on_ready():
-    await client.change_presence(status=discord.Status.offline)  # Let's hide the bot
-    print(f"We have logged in as {client.user}")
+    # Let's hide the bot
+    print(f"We have logged in as {client.me.name}")
 
 
 @client.event
-async def on_message(message):
-    if message.author == client.user:
+async def on_message_create(message):
+    if message.author == client.me.id:
         return
 
     if message.content.startswith("$hello"):
-        await message.channel.send("Hello!")
+        channel = await message.get_channel() 
+        await channel.send("Hello!")
 
     if message.content.startswith("$$leaderboard"):
         await leaderboard(conn, client, message, LEADERBOARD_LIMIT)
@@ -67,18 +65,19 @@ async def on_message(message):
         print("We were asked to manually run the distribution script")
         await notify_submitter(client, conn, NOTIFY_USER)
 
-    if message.channel.id not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
+    if message.channel_id not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
         return
 
     if message.mentions != []:
         for member in message.mentions:
-            if member.id == message.author.id or not hasRole(member.roles, REQUIRED_ROLE_ID):
+            
+            if member['id'] == message.author.id or not hasRole(member['member']['roles'], REQUIRED_ROLE_ID):
                 continue
             processVote(message.id, member.id, message.author.id)
 
 
 @client.event
-async def on_reaction_add(reaction, user):
+async def on_message_reaction_add(reaction, user):
     channel = reaction.message.channel
 
     if channel.id not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
@@ -93,35 +92,35 @@ async def on_reaction_add(reaction, user):
         processVote(reaction.message.id, reaction.message.author.id, user.id)
 
 
-@slash.slash(
+@client.command(
     name="link",
     description="Link your public key",
     options=[
-        create_option(
+        Option(
             name="public_key",
             description="public-net public key",
-            option_type=3,
+            type=OptionType.STRING,
             required=True,
         )
     ],
 )
-async def _link_reward(ctx, public_key: str):
+async def _link_reward(ctx: CommandContext, public_key: str):
     if not validate_pub_key(public_key):
         await ctx.send("Invalid public key supplied!")
     else:
-        if linkUserPubKey(conn, ctx.author_id, public_key):
+        if linkUserPubKey(conn, ctx.user.id, public_key):
             await ctx.send(f"Linked `{public_key}` to your discord account!")
         else:
             await ctx.send("Unknown error linking your public key! Please ask somewhere...")
 
 
-@slash.slash(
+@client.command(
     name="my_public_key",
     description="Display your public key",
 )
-async def _my_pub_key(ctx):
-    public_key = getUserPubKey(conn, ctx.author_id)
-
+async def _my_pub_key(ctx: CommandContext):
+    public_key = getUserPubKey(conn, ctx.user.id)
+    
     if public_key is not None:
         await ctx.send(f"Your account is associated with the following public_key {public_key}")
     else:
@@ -130,4 +129,4 @@ async def _my_pub_key(ctx):
 
 if __name__ == "__main__":
     setup_db(conn)
-    client.run(DISCORD_BOT_TOKEN)
+    client.start()

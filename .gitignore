@@ -133,3 +133,5 @@ bin/
 pyvenv.cfg
 .vscode/
 .env
+
+.DS_Store
