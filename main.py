@@ -33,10 +33,11 @@ if not isinstance(DISCORD_WHITELIST_CHANNELS, list) or (
     exit
 
 
-client = Client(token=DISCORD_BOT_TOKEN, intents=Intents.GUILD_MESSAGES | Intents.DIRECT_MESSAGES |
-                Intents.GUILD_MESSAGE_REACTIONS | Intents.GUILD_MESSAGE_CONTENT, 
-                presence=ClientPresence(status=StatusType.OFFLINE)
-                )
+client = Client(
+    token=DISCORD_BOT_TOKEN, intents=Intents.GUILD_MESSAGES | Intents.DIRECT_MESSAGES |
+    Intents.GUILD_MESSAGE_REACTIONS | Intents.GUILD_MESSAGE_CONTENT,
+    presence=ClientPresence(status=StatusType.OFFLINE)
+)
 conn = create_connection(DATABASE_NAME)
 
 
