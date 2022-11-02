@@ -87,7 +87,7 @@ def fetch_last_tx(pubKey: str = REWARD_PUBLIC_KEY, memo: str = "Lumenaut reward!
             .for_account(pubKey)
             .include_failed(False)
             .limit(200)
-            .order("desc")
+            .order(desc=True)
             .call()["_embedded"]["records"]
         )
 
@@ -105,7 +105,8 @@ def fetch_last_tx(pubKey: str = REWARD_PUBLIC_KEY, memo: str = "Lumenaut reward!
                 return datetime.strptime(created, "%Y-%m-%dT%H:%M:%SZ")
             return datetime.strptime(timeBound, "%Y-%m-%dT%H:%M:%SZ")
         return None
-    except Exception:
+    except Exception as e:
+        print(e)
         return None
 
 
