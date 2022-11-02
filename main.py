@@ -48,7 +48,6 @@ def processVote(message_id, author, backer):
 
 @client.event
 async def on_ready():
-    # Let's hide the bot
     print(f"We have logged in as {client.me.name}")
 
 
