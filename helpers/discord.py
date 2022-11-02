@@ -36,7 +36,7 @@ async def leaderboard(conn, client, message, limit):
     discord_file = generate_graph(usernames, upvotes)
     embed.set_image(url="attachment://graph.png")
     embed.set_footer(text="Made with love, code and Python")
-    channel = await message.get_channel() 
+    channel = await message.get_channel()
     await channel.send("And the results are in!", embeds=[embed], files=discord_file)
 
 

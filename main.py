@@ -33,8 +33,8 @@ if not isinstance(DISCORD_WHITELIST_CHANNELS, list) or (
     exit
 
 
-client = Client(token=DISCORD_BOT_TOKEN, intents=Intents.GUILD_MESSAGES | Intents.DIRECT_MESSAGES | Intents.GUILD_MESSAGE_REACTIONS | Intents.GUILD_MESSAGE_CONTENT)
-print(client._intents)
+client = Client(token=DISCORD_BOT_TOKEN, intents=Intents.GUILD_MESSAGES | Intents.DIRECT_MESSAGES |
+                Intents.GUILD_MESSAGE_REACTIONS | Intents.GUILD_MESSAGE_CONTENT, presence=ClientPresence(status=StatusType.OFFLINE))
 conn = create_connection(DATABASE_NAME)
 
 
@@ -55,7 +55,7 @@ async def on_message_create(message):
         return
 
     if message.content.startswith("$hello"):
-        channel = await message.get_channel() 
+        channel = await message.get_channel()
         await channel.send("Hello!")
 
     if message.content.startswith("$$leaderboard"):
@@ -70,7 +70,7 @@ async def on_message_create(message):
 
     if message.mentions != []:
         for member in message.mentions:
-            
+
             if member['id'] == message.author.id or not hasRole(member['member']['roles'], REQUIRED_ROLE_ID):
                 continue
             processVote(message.id, member.id, message.author.id)
@@ -120,7 +120,7 @@ async def _link_reward(ctx: CommandContext, public_key: str):
 )
 async def _my_pub_key(ctx: CommandContext):
     public_key = getUserPubKey(conn, ctx.user.id)
-    
+
     if public_key is not None:
         await ctx.send(f"Your account is associated with the following public_key {public_key}")
     else:
