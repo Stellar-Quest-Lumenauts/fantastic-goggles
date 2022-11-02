@@ -7,6 +7,7 @@
 aiohttp==3.8.3
     # via
     #   aiohttp-sse-client
+    #   discord-py
     #   discord-py-slash-command
     #   stellar-sdk
 aiohttp-sse-client==0.2.1
@@ -43,6 +44,8 @@ coverage==6.5.0
     # via -r requirements.in
 cycler==0.11.0
     # via matplotlib
+discord-py==2.0.1
+    # via -r requirements.in
 discord-py-slash-command==4.2.1
     # via -r requirements.in
 environs==9.5.0
