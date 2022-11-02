@@ -42,10 +42,7 @@ async def leaderboard(conn, client, message, limit):
 
 def hasRole(roles, REQUIRED_ROLE_ID):
     roles = [int(role) for role in roles]
-    if REQUIRED_ROLE_ID in roles:
-        return True
-    return False
-
+    return REQUIRED_ROLE_ID in roles
 
 def generate_payouts(conn):
     # possible bug if last_tx_date == None =>
