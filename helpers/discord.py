@@ -1,5 +1,6 @@
 from datetime import datetime
 from interactions import Embed
+import interactions
 
 from .database import fetchLeaderboard, fetchUserPubKeys
 from .generic import upload_to_hastebin, post_to_refractor
@@ -8,7 +9,7 @@ from .graphs import generate_graph
 from settings.default import BASE_FEE, USE_REFRACTOR
 
 
-async def leaderboard(conn, client, message, limit):
+async def leaderboard(conn, client, message, limit, guild_id):
     last = fetch_last_tx()
     embed = Embed(
         title="Leaderboard",
@@ -28,7 +29,7 @@ async def leaderboard(conn, client, message, limit):
         if row is None or counter == limit:
             break
 
-        user = await client.fetch_user(row[0])
+        user = await interactions.get(client, interactions.Member, object_id=row[0], parent_id=guild_id)
         embed.add_field(name=f"``#{counter+1}`` {user.name}", value=f"{row[1]} Upvotes", inline=True)
         usernames.append(user.name)
         upvotes.append(row[1])
