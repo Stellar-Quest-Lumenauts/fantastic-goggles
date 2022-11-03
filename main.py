@@ -59,7 +59,7 @@ async def on_ready():
 async def on_message_create(message):
     if message.author == client.me.id:
         return
-        
+
     if message.channel_id not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
         return
 
