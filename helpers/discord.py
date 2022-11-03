@@ -9,7 +9,7 @@ from .graphs import generate_graph
 from settings.default import BASE_FEE, USE_REFRACTOR
 
 
-async def leaderboard(conn, client, message, limit, guild_id):
+async def leaderboard(conn, client, channel, limit, guild_id):
     last = fetch_last_tx()
     embed = Embed(
         title="Leaderboard",
@@ -37,7 +37,6 @@ async def leaderboard(conn, client, message, limit, guild_id):
     discord_file = generate_graph(usernames, upvotes)
     embed.set_image(url="attachment://graph.png")
     embed.set_footer(text="Made with love, code and Python")
-    channel = await message.get_channel()
     await channel.send("And the results are in!", embeds=[embed], files=discord_file)
 
 
@@ -103,8 +102,8 @@ def generate_report(payouts: list) -> str:
     return tx_xdr  # todo size limit?
 
 
-async def notify_submitter(client, conn, user):
-    notify_user = await client.fetch_user(user)
+async def notify_submitter(client, conn, user, guild_id):
+    notify_user = await interactions.get(client, interactions.Member, object_id=user, parent_id=guild_id)
     try:
         payouts = generate_payouts(conn)
         report = generate_report(payouts)
