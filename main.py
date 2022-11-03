@@ -62,7 +62,7 @@ async def on_message_create(message):
         await channel.send("Hello!")
 
     if message.content.startswith("$$leaderboard"):
-        await leaderboard(conn, client, message, LEADERBOARD_LIMIT)
+        await leaderboard(conn, client, message, LEADERBOARD_LIMIT, message.guild_id)
 
     if message.content.startswith("$$distribute") and int(message.author.id) == int(NOTIFY_USER):
         print("We were asked to manually run the distribution script")
@@ -76,7 +76,7 @@ async def on_message_create(message):
 
             if member['id'] == message.author.id or not hasRole(member['member']['roles'], REQUIRED_ROLE_ID):
                 continue
-            processVote(message.id, member.id, message.author.id)
+            processVote(message.id, member['id'], message.author.id)
 
 
 @client.event
