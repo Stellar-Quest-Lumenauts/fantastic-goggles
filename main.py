@@ -1,3 +1,4 @@
+import interactions
 from interactions import Client, Intents, Option, OptionType, CommandContext, ClientPresence, StatusType
 import sentry_sdk
 
@@ -79,19 +80,24 @@ async def on_message_create(message):
 
 
 @client.event
-async def on_message_reaction_add(reaction, user):
-    channel = reaction.message.channel
+async def on_message_reaction_add(reaction):
+    channel = reaction.channel_id
+    user_id = reaction.user_id
+    message_id = reaction.message_id
 
-    if channel.id not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
+    message = await interactions.get(client, interactions.Message, object_id=message_id, parent_id=channel)
+    member = await interactions.get(client, interactions.Member, object_id=user_id, parent_id=reaction.guild_id)
+
+    if channel not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
         return
 
     if (
-        (reaction.emoji in DISCORD_ALLOWED_REACTION or len(DISCORD_ALLOWED_REACTION) == 0)
-        and user.id != reaction.message.author.id
-        and hasRole(reaction.message.author.roles, REQUIRED_ROLE_ID)
-        and user.id != client.user.id
+        (reaction.emoji.name in DISCORD_ALLOWED_REACTION or len(DISCORD_ALLOWED_REACTION) == 0)
+        and user_id != message.author.id
+        and hasRole(member.roles, REQUIRED_ROLE_ID)
+        and user_id != client.me.id
     ):
-        processVote(reaction.message.id, reaction.message.author.id, user.id)
+        processVote(message_id, message.author.id, user_id)
 
 
 @client.command(
