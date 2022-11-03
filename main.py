@@ -35,9 +35,12 @@ if not isinstance(DISCORD_WHITELIST_CHANNELS, list) or (
 
 
 client = Client(
-    token=DISCORD_BOT_TOKEN, intents=Intents.GUILD_MESSAGES | Intents.DIRECT_MESSAGES |
-    Intents.GUILD_MESSAGE_REACTIONS | Intents.GUILD_MESSAGE_CONTENT,
-    presence=ClientPresence(status=StatusType.OFFLINE)
+    token=DISCORD_BOT_TOKEN,
+    intents=Intents.GUILD_MESSAGES
+    | Intents.DIRECT_MESSAGES
+    | Intents.GUILD_MESSAGE_REACTIONS
+    | Intents.GUILD_MESSAGE_CONTENT,
+    presence=ClientPresence(status=StatusType.OFFLINE),
 )
 conn = create_connection(DATABASE_NAME)
 
@@ -57,16 +60,9 @@ async def on_message_create(message):
     if message.author == client.me.id:
         return
 
-    if message.content.startswith("$hello"):
-        channel = await message.get_channel()
-        await channel.send("Hello!")
-
-    if message.content.startswith("$$leaderboard"):
-        await leaderboard(conn, client, message, LEADERBOARD_LIMIT, message.guild_id)
-
     if message.content.startswith("$$distribute") and int(message.author.id) == int(NOTIFY_USER):
         print("We were asked to manually run the distribution script")
-        await notify_submitter(client, conn, NOTIFY_USER)
+        await notify_submitter(client, conn, NOTIFY_USER, message.guild_id)
 
     if message.channel_id not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
         return
@@ -74,9 +70,9 @@ async def on_message_create(message):
     if message.mentions != []:
         for member in message.mentions:
 
-            if member['id'] == message.author.id or not hasRole(member['member']['roles'], REQUIRED_ROLE_ID):
+            if member["id"] == message.author.id or not hasRole(member["member"]["roles"], REQUIRED_ROLE_ID):
                 continue
-            processVote(message.id, member['id'], message.author.id)
+            processVote(message.id, member["id"], message.author.id)
 
 
 @client.event
@@ -133,6 +129,30 @@ async def _my_pub_key(ctx: CommandContext):
         await ctx.send(f"Your account is associated with the following public_key {public_key}")
     else:
         await ctx.send("Your account has not been found. Use `/link public_key` to add it to the database.")
+
+
+@client.command(name="hello", description="You get a Hello reply!")
+async def _hello(ctx: CommandContext):
+    await ctx.send("Hello!")
+
+
+@client.command(
+    name="leaderboard",
+    description="Display the Leaderboard",
+)
+async def _leaderboard(ctx: CommandContext):
+    channel = await interactions.get(client, interactions.Channel, object_id=ctx.channel_id)
+    await leaderboard(conn, client, channel, LEADERBOARD_LIMIT, ctx.guild_id)
+    await ctx.send("The Leaderboard has been generated.")
+
+
+@client.command(name="distribute", description="Start prize distribution!")
+async def _distribute(ctx: CommandContext):
+    if ctx.author.id == NOTIFY_USER:
+        await notify_submitter(client, conn, NOTIFY_USER, ctx.guild_id)
+        await ctx.send("https://tenor.com/view/sacha-baron-cohen-great-success-yay-gif-4185058")
+    else:
+        await ctx.send("https://tenor.com/view/you-shall-not-pass-lotr-do-not-enter-not-allowed-scream-gif-16729885")
 
 
 if __name__ == "__main__":
