@@ -59,11 +59,7 @@ async def on_ready():
 async def on_message_create(message):
     if message.author == client.me.id:
         return
-
-    if message.content.startswith("$$distribute") and int(message.author.id) == int(NOTIFY_USER):
-        print("We were asked to manually run the distribution script")
-        await notify_submitter(client, conn, NOTIFY_USER, message.guild_id)
-
+        
     if message.channel_id not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
         return
 
