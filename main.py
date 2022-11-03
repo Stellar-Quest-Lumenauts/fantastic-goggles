@@ -108,7 +108,7 @@ async def _link_reward(ctx: CommandContext, public_key: str):
     if not validate_pub_key(public_key):
         await ctx.send("Invalid public key supplied!")
     else:
-        if linkUserPubKey(conn, ctx.user.id, public_key):
+        if linkUserPubKey(conn, str(ctx.user.id), public_key):
             await ctx.send(f"Linked `{public_key}` to your discord account!")
         else:
             await ctx.send("Unknown error linking your public key! Please ask somewhere...")

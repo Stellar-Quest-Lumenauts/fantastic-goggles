@@ -81,8 +81,11 @@ def linkUserPubKey(conn: Connection, user: str, key: str) -> bool:
     c = conn.cursor()
     if SQLITE3_ENABLED:
         c.execute(
-            "INSERT INTO users(user_id, stellar_account) VALUES (?, ?)",
-            (int(user), str(key)),
+            """
+            INSERT INTO users(user_id, stellar_account) VALUES (?, ?) ON CONFLICT (user_id) 
+            DO UPDATE SET stellar_account=?
+            """,
+            (int(user), str(key), str(key)),
         )
     else:
         c.execute(
