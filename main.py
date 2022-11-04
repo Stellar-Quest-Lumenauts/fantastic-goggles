@@ -15,6 +15,9 @@ from settings.default import (
     NOTIFY_USER,
     REQUIRED_ROLE_ID,
     DISCORD_BOT_TOKEN,
+    MESSAGE_REPLY,
+    REACTION,
+    POSTED_MESSAGE
 )
 
 if SENTRY_ENABLED:
@@ -45,8 +48,8 @@ client = Client(
 conn = create_connection(DATABASE_NAME)
 
 
-def processVote(message_id, author, backer):
-    if updateHistory(conn, author, message_id, backer):
+def processVote(message_id, author, backer, vote_type, characther_count):
+    if updateHistory(conn, author, message_id, backer, vote_type, characther_count):
         print(f"{author} got an upvote!")
 
 
@@ -73,10 +76,15 @@ async def on_message_create(message):
 
     if message.mentions != []:
         for member in message.mentions:
-
             if member["id"] == message.author.id or not hasRole(member["member"]["roles"], REQUIRED_ROLE_ID):
                 continue
-            processVote(message.id, member["id"], message.author.id)
+            processVote(message.id, member["id"], message.author.id, MESSAGE_REPLY, "0")
+
+    # Check if the Author is a Lumenaut and Count his Content in a Message
+    member = await interactions.get(client, interactions.Member, parent_id=message.guild_id, object_id=message.author.id)
+    if hasRole(member.roles, REQUIRED_ROLE_ID):
+        processVote(message.id, message.author.id, None , POSTED_MESSAGE, len(message.content))
+
 
 
 @client.event
@@ -105,7 +113,7 @@ async def on_message_reaction_add(reaction):
         and hasRole(member.roles, REQUIRED_ROLE_ID)
         and user_id != client.me.id
     ):
-        processVote(message_id, message.author.id, user_id)
+        processVote(message_id, message.author.id, user_id, REACTION, "0")
 
 
 @client.command(
@@ -153,19 +161,22 @@ async def _hello(ctx: CommandContext):
     description="Display the Leaderboard",
 )
 async def _leaderboard(ctx: CommandContext):
-    channel = await interactions.get(client, interactions.Channel, object_id=ctx.channel_id)
-    await leaderboard(conn, client, channel, LEADERBOARD_LIMIT, ctx.guild_id)
-    await ctx.send("The Leaderboard has been generated.")
+    await ctx.send("The Functionality has been disabled.")
+    #channel = await interactions.get(client, interactions.Channel, object_id=ctx.channel_id)
+    #await leaderboard(conn, client, channel, LEADERBOARD_LIMIT, ctx.guild_id)
+    #await ctx.send("The Leaderboard has been generated.")
 
 
 @client.command(name="distribute", description="Start prize distribution!")
 async def _distribute(ctx: CommandContext):
+    await ctx.send("The Functionality has been disabled.")
+    """
     if ctx.author.id == NOTIFY_USER:
         await notify_submitter(client, conn, NOTIFY_USER, ctx.guild_id)
         await ctx.send("https://tenor.com/view/sacha-baron-cohen-great-success-yay-gif-4185058")
     else:
         await ctx.send("https://tenor.com/view/you-shall-not-pass-lotr-do-not-enter-not-allowed-scream-gif-16729885")
-
+    """
 
 if __name__ == "__main__":
     setup_db(conn)
