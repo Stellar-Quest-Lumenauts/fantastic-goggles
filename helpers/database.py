@@ -45,7 +45,8 @@ def setup_db(conn: Connection) -> None:
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER,
-            message_id INTEGER, backer INTEGER, VOTE_TYPE INTEGER NOT NULL, vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)
+            message_id INTEGER, backer INTEGER, VOTE_TYPE INTEGER NOT NULL, 
+            vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)
             """
         )
         c.execute(
@@ -64,7 +65,7 @@ def setup_db(conn: Connection) -> None:
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS votes_history (id SERIAL NOT NULL PRIMARY KEY, user_id BIGINT,
-            message_id BIGINT, backer BIGINT, VOTE_TYPE INTEGER NOT NULL, 
+            message_id BIGINT, backer BIGINT, VOTE_TYPE INTEGER NOT NULL,
             vote_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)
             """
         )
@@ -167,7 +168,7 @@ def updateHistory(
             (
                 int(author),
                 int(message_id),
-                None if backer == None else int(backer),
+                None if backer is None else int(backer),
                 int(vote_type),
             ),
         )
