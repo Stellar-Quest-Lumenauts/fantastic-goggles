@@ -9,8 +9,8 @@ class WarningTest(TestCase):
     def setUp(self):
         self.conn = create_connection(":memory:")
         setup_db(self.conn)
-        updateHistory(self.conn, "1234", "4567", "7890")
-        updateHistory(self.conn, "2345", "5678", "7890")
+        updateHistory(self.conn, "1234", "4567", "7890", "0", "0")
+        updateHistory(self.conn, "2345", "5678", "7890", "0", "0")
         linkUserPubKey(
             self.conn,
             "1234",
