@@ -153,7 +153,9 @@ def getUser(conn: Connection, author: str) -> Any:
     return row
 
 
-def updateHistory(conn: Connection, author: str, message_id: str, backer: str, vote_type: str, characther_count: str) -> bool:
+def updateHistory(
+    conn: Connection, author: str, message_id: str, backer: str, vote_type: str, characther_count: str
+) -> bool:
     """
     Updates the history
     Returns success
@@ -175,7 +177,7 @@ def updateHistory(conn: Connection, author: str, message_id: str, backer: str, v
                 (
                     int(message_id),
                     int(characther_count),
-                )
+                ),
             )
         conn.commit()
     except Exception as e:
