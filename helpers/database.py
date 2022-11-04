@@ -45,7 +45,7 @@ def setup_db(conn: Connection) -> None:
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER,
-            message_id INTEGER, backer INTEGER, VOTE_TYPE INTEGER NOT NULL, 
+            message_id INTEGER, backer INTEGER, VOTE_TYPE INTEGER NOT NULL,
             vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)
             """
         )
