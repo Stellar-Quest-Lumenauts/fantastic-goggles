@@ -92,7 +92,9 @@ async def on_message_reaction_add(reaction):
     message_id = reaction.message_id
 
     message = await interactions.get(client, interactions.Message, object_id=message_id, parent_id=reaction.channel_id)
-    member = await interactions.get(client, interactions.Member, object_id=message.author.id, parent_id=reaction.guild_id)
+    member = await interactions.get(
+        client, interactions.Member, object_id=message.author.id, parent_id=reaction.guild_id
+    )
 
     if channel_id not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
         return
