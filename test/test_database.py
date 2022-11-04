@@ -34,7 +34,7 @@ class DatabaseTest(TestCase):
         )
 
     def test_history(self):
-        res = updateHistory(self.conn, "1234", "4567", "7890")
+        res = updateHistory(self.conn, "1234", "4567", "7890", "0", "0")
         self.assertTrue(res)
 
         user = getUser(self.conn, "1234")
@@ -48,14 +48,14 @@ class DatabaseTest(TestCase):
         self.assertEqual(user, (None, 0))
 
     def test_leaderboard(self):
-        updateHistory(self.conn, "1234", "4567", "7890")
-        updateHistory(self.conn, "1234", "3456", "7890")
-        updateHistory(self.conn, "2233", "4568", "7890")
+        updateHistory(self.conn, "1234", "4567", "7890", "0", "0")
+        updateHistory(self.conn, "1234", "3456", "7890", "0", "0")
+        updateHistory(self.conn, "2233", "4568", "7890", "0", "0")
         res = fetchLeaderboard(self.conn)
         self.assertEqual(len(res), 2)
 
     def test_query_history(self):
-        updateHistory(self.conn, "1234", "4567", "7890")
+        updateHistory(self.conn, "1234", "4567", "7890", "0", "0")
         res = queryHistory(self.conn, "4567")
         self.assertEqual(res[0], 1234)
 
