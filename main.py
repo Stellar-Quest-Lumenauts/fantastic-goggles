@@ -1,5 +1,5 @@
 import interactions
-from interactions import Client, Intents, Option, OptionType, CommandContext, ClientPresence, StatusType
+from interactions import Client, Intents, Option, OptionType, CommandContext, ClientPresence, StatusType, ChannelType
 import sentry_sdk
 
 from helpers.stellar import validate_pub_key
@@ -57,10 +57,18 @@ async def on_ready():
 
 @client.event
 async def on_message_create(message):
+    # Look Up the Channel and Channel Type
+    channel = await interactions.get(client, interactions.Channel, object_id=message.channel_id)
+    channel_id = message.channel_id
+
+    # Each Discord Thread is it's own Channel, So get the Parent Channel's ID and check that instead.
+    if channel.type == ChannelType.PUBLIC_THREAD:
+        channel_id = channel.parent_id
+
     if message.author == client.me.id:
         return
 
-    if message.channel_id not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
+    if channel_id not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
         return
 
     if message.mentions != []:
@@ -73,14 +81,22 @@ async def on_message_create(message):
 
 @client.event
 async def on_message_reaction_add(reaction):
-    channel = reaction.channel_id
+    channel = await interactions.get(client, interactions.Channel, object_id=reaction.channel_id)
+    channel_id = reaction.channel_id
+
+    # Each Discord Thread is it's own Channel, So get the Parent Channel's ID and check that instead.
+    if channel.type == ChannelType.PUBLIC_THREAD:
+        channel_id = channel.parent_id
+
     user_id = reaction.user_id
     message_id = reaction.message_id
 
-    message = await interactions.get(client, interactions.Message, object_id=message_id, parent_id=channel)
-    member = await interactions.get(client, interactions.Member, object_id=user_id, parent_id=reaction.guild_id)
+    message = await interactions.get(client, interactions.Message, object_id=message_id, parent_id=reaction.channel_id)
+    member = await interactions.get(
+        client, interactions.Member, object_id=message.author.id, parent_id=reaction.guild_id
+    )
 
-    if channel not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
+    if channel_id not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
         return
 
     if (
