@@ -59,7 +59,7 @@ def setup_db(conn: Connection) -> None:
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS messages(message_id INTEGER PRIMARY KEY, character_count INTEGER NOT NULL,
-            channel_id INTEGER NOT NULL, created_time DATETIME DEFAULT CURRENT_TIMESTAMP, 
+            channel_id INTEGER NOT NULL, created_time DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_time DATETIME DEFAULT CURRENT_TIMESTAMP)
             """
         )
@@ -80,7 +80,7 @@ def setup_db(conn: Connection) -> None:
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS messages(message_id BIGINT NOT NULL PRIMARY KEY,
-            character_count BIGINT NOT NULL, channel_id BIGINT NOT NULL, 
+            character_count BIGINT NOT NULL, channel_id BIGINT NOT NULL,
             created_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
             updated_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)
             """
