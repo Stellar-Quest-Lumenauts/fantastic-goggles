@@ -41,11 +41,12 @@ def create_connection(db_file: str) -> Connection:
 
 def setup_db(conn: Connection) -> None:
     c = conn.cursor()
+    # Note: Enable NOT NULL for message_id, channel_id when the database gets dropped someday...
     if SQLITE3_ENABLED:
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER,
-            message_id INTEGER, backer INTEGER, VOTE_TYPE INTEGER,
+            message_id INTEGER, channel_id, INTEGER, backer INTEGER, VOTE_TYPE INTEGER,
             vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)
             """
         )
@@ -58,14 +59,15 @@ def setup_db(conn: Connection) -> None:
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS messages(message_id INTEGER PRIMARY KEY, character_count INTEGER NOT NULL,
-            created_time DATETIME DEFAULT CURRENT_TIMESTAMP, updated_time DATETIME DEFAULT CURRENT_TIMESTAMP)
+            channel_id INTEGER NOT NULL, created_time DATETIME DEFAULT CURRENT_TIMESTAMP, 
+            updated_time DATETIME DEFAULT CURRENT_TIMESTAMP)
             """
         )
     else:
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS votes_history (id SERIAL NOT NULL PRIMARY KEY, user_id BIGINT,
-            message_id BIGINT, backer BIGINT, VOTE_TYPE INTEGER,
+            message_id BIGINT, channel_id BIGINT, backer BIGINT, VOTE_TYPE INTEGER,
             vote_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)
             """
         )
@@ -78,7 +80,8 @@ def setup_db(conn: Connection) -> None:
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS messages(message_id BIGINT NOT NULL PRIMARY KEY,
-            character_count BIGINT NOT NULL, created_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            character_count BIGINT NOT NULL, channel_id BIGINT NOT NULL, 
+            created_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
             updated_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)
             """
         )
@@ -155,7 +158,7 @@ def getUser(conn: Connection, author: str) -> Any:
 
 
 def updateHistory(
-    conn: Connection, author: str, message_id: str, backer: str, vote_type: str, characther_count: str
+    conn: Connection, author: str, message_id: str, channel_id: str, backer: str, vote_type: str, character_count: str
 ) -> bool:
     """
     Updates the history
@@ -164,20 +167,24 @@ def updateHistory(
     c = conn.cursor()
     try:
         c.execute(
-            prepareQuery("INSERT INTO votes_history (user_id, message_id, backer, vote_type) VALUES (?,?,?,?)"),
+            prepareQuery(
+                "INSERT INTO votes_history (user_id, message_id, channel_id, backer, vote_type) VALUES (?,?,?,?,?)"
+            ),
             (
                 int(author),
                 int(message_id),
+                int(channel_id),
                 None if backer is None else int(backer),
                 int(vote_type),
             ),
         )
         if vote_type == POSTED_MESSAGE:
             c.execute(
-                prepareQuery("INSERT INTO messages (message_id, character_count) VALUES (?,?)"),
+                prepareQuery("INSERT INTO messages (message_id, channel_id, character_count) VALUES (?,?,?)"),
                 (
                     int(message_id),
-                    int(characther_count),
+                    int(channel_id),
+                    int(character_count),
                 ),
             )
         conn.commit()
