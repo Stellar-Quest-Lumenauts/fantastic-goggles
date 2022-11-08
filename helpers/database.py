@@ -4,7 +4,7 @@ import sqlite3
 from typing import Any, Union
 import psycopg2
 
-from settings.default import SQLITE3_ENABLED
+from settings.default import SQLITE3_ENABLED, POSTED_MESSAGE
 
 Connection = Union[sqlite3.Connection, Any]
 
@@ -45,7 +45,8 @@ def setup_db(conn: Connection) -> None:
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS votes_history (id INTEGER AUTO_INCREMENT PRIMARY KEY, user_id INTEGER,
-            message_id INTEGER, backer INTEGER, vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)
+            message_id INTEGER, backer INTEGER, VOTE_TYPE INTEGER,
+            vote_time DATETIME DEFAULT CURRENT_TIMESTAMP)
             """
         )
         c.execute(
@@ -54,17 +55,31 @@ def setup_db(conn: Connection) -> None:
             ON CONFLICT REPLACE)
             """
         )
+        c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS messages(message_id INTEGER PRIMARY KEY, character_count INTEGER NOT NULL,
+            created_time DATETIME DEFAULT CURRENT_TIMESTAMP, updated_time DATETIME DEFAULT CURRENT_TIMESTAMP)
+            """
+        )
     else:
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS votes_history (id SERIAL NOT NULL PRIMARY KEY, user_id BIGINT,
-            message_id BIGINT, backer BIGINT, vote_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)
+            message_id BIGINT, backer BIGINT, VOTE_TYPE INTEGER,
+            vote_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)
             """
         )
         c.execute(
             """
             CREATE TABLE IF NOT EXISTS users(user_id BIGINT NOT NULL PRIMARY KEY,
             stellar_account VARCHAR(56) NOT NULL)
+            """
+        )
+        c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS messages(message_id BIGINT NOT NULL PRIMARY KEY,
+            character_count BIGINT NOT NULL, created_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            updated_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP)
             """
         )
 
@@ -139,7 +154,9 @@ def getUser(conn: Connection, author: str) -> Any:
     return row
 
 
-def updateHistory(conn: Connection, author: str, message_id: str, backer: str) -> bool:
+def updateHistory(
+    conn: Connection, author: str, message_id: str, backer: str, vote_type: str, characther_count: str
+) -> bool:
     """
     Updates the history
     Returns success
@@ -147,15 +164,25 @@ def updateHistory(conn: Connection, author: str, message_id: str, backer: str) -
     c = conn.cursor()
     try:
         c.execute(
-            prepareQuery("INSERT INTO votes_history (user_id, message_id, backer) VALUES (?,?,?)"),
+            prepareQuery("INSERT INTO votes_history (user_id, message_id, backer, vote_type) VALUES (?,?,?,?)"),
             (
                 int(author),
                 int(message_id),
-                int(backer),
+                None if backer is None else int(backer),
+                int(vote_type),
             ),
         )
+        if vote_type == POSTED_MESSAGE:
+            c.execute(
+                prepareQuery("INSERT INTO messages (message_id, characther_count) VALUES (?,?)"),
+                (
+                    int(message_id),
+                    int(characther_count),
+                ),
+            )
         conn.commit()
-    except Exception:
+    except Exception as e:
+        print(e)
         return False
 
     return c.rowcount > 0
