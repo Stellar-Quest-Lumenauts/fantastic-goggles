@@ -174,7 +174,7 @@ def updateHistory(
         )
         if vote_type == POSTED_MESSAGE:
             c.execute(
-                prepareQuery("INSERT INTO messages (message_id, characther_count) VALUES (?,?)"),
+                prepareQuery("INSERT INTO messages (message_id, character_count) VALUES (?,?)"),
                 (
                     int(message_id),
                     int(characther_count),
