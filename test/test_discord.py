@@ -23,12 +23,12 @@ class DiscordTest(TestCase):
         # Generate some votes
         # - 2 for leader
         # - 1 for 4 more users
-        updateHistory(self.conn, "1234", "35634535", "5656734", "0", "0")
-        updateHistory(self.conn, "1234", "65765765", "7675654", "0", "0")
-        updateHistory(self.conn, "3456", "24435646", "2376558", "0", "0")
-        updateHistory(self.conn, "4567", "56677456", "6754326", "0", "0")
-        updateHistory(self.conn, "5678", "76867574", "9763453", "0", "0")
-        updateHistory(self.conn, "9999", "76867574", "9763453", "0", "0")  # will not be linked
+        updateHistory(self.conn, "1234", "35634535", "8888", "5656734", "0", "0")
+        updateHistory(self.conn, "1234", "65765765", "8888", "7675654", "0", "0")
+        updateHistory(self.conn, "3456", "24435646", "8888", "2376558", "0", "0")
+        updateHistory(self.conn, "4567", "56677456", "8888", "6754326", "0", "0")
+        updateHistory(self.conn, "5678", "76867574", "8888", "9763453", "0", "0")
+        updateHistory(self.conn, "9999", "76867574", "8888", "9763453", "0", "0")  # will not be linked
         # Link accounts - 4 users linked, one user with 1 vote missing a link
         linkUserPubKey(self.conn, "1234", "GBFCLLXBHWJMRY6SX7VVPXDGOWRGP7TWXCCNAEFOOCTCQAE3TDSH6GWC")
         linkUserPubKey(self.conn, "3456", "GCUSNN2ME2IPEGVXAT4YRH3HNZXMWEGCPUNMSMSIUR6TIBGTDE36CBWX")
