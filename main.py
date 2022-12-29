@@ -4,7 +4,7 @@ import sentry_sdk
 
 from helpers.stellar import validate_pub_key
 
-# from helpers.discord import leaderboard, hasRole, notify_submitter
+from helpers.discord import leaderboard, hasRole, notify_submitter
 from helpers.discord import hasRole
 from helpers.database import updateHistory, linkUserPubKey, setup_db, create_connection, getUserPubKey
 from settings.default import (
@@ -13,8 +13,8 @@ from settings.default import (
     DISCORD_ALLOWED_REACTION,
     DISCORD_WHITELIST_CHANNELS,
     DATABASE_NAME,
-    #    LEADERBOARD_LIMIT,
-    #    NOTIFY_USER,
+    LEADERBOARD_LIMIT,
+    NOTIFY_USER,
     REQUIRED_ROLE_ID,
     DISCORD_BOT_TOKEN,
     MESSAGE_REPLY,
@@ -164,23 +164,18 @@ async def _hello(ctx: CommandContext):
     description="Display the Leaderboard",
 )
 async def _leaderboard(ctx: CommandContext):
-    await ctx.send("The Functionality has been disabled.")
-    # channel = await interactions.get(client, interactions.Channel, object_id=ctx.channel_id)
-    # await leaderboard(conn, client, channel, LEADERBOARD_LIMIT, ctx.guild_id)
-    # await ctx.send("The Leaderboard has been generated.")
+    channel = await interactions.get(client, interactions.Channel, object_id=ctx.channel_id)
+    await leaderboard(conn, client, channel, LEADERBOARD_LIMIT, ctx.guild_id)
+    await ctx.send("The Leaderboard has been generated.")
 
 
 @client.command(name="distribute", description="Start prize distribution!")
 async def _distribute(ctx: CommandContext):
-    await ctx.send("The Functionality has been disabled.")
-    """
     if ctx.author.id == NOTIFY_USER:
         await notify_submitter(client, conn, NOTIFY_USER, ctx.guild_id)
         await ctx.send("https://tenor.com/view/sacha-baron-cohen-great-success-yay-gif-4185058")
     else:
         await ctx.send("https://tenor.com/view/you-shall-not-pass-lotr-do-not-enter-not-allowed-scream-gif-16729885")
-    """
-
 
 if __name__ == "__main__":
     setup_db(conn)

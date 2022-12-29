@@ -2,12 +2,57 @@ from datetime import datetime
 from interactions import Embed
 import interactions
 
-from .database import fetchLeaderboard, fetchUserPubKeys
+from .database import fetchLeaderboard, fetchUserPubKeys, fetchMessages
 from .generic import upload_to_hastebin, post_to_refractor
 from .stellar import fetch_last_tx, fetch_account_balance, generate_reward_tx
 from .graphs import generate_graph
-from settings.default import BASE_FEE, USE_REFRACTOR
+from settings.default import BASE_FEE, USE_REFRACTOR, MESSAGE_REPLY, REACTION, POSTED_MESSAGE, EVENT_POINTS, TYPE_TO_VAR, MESSAGE_UPVOTE_DISTRIBUTION
 
+def countMessages(conn, last, parsed_data: dict, minValue: int, maxValue: int, points: int):
+    """
+    Count the Messages based on an upvote formula
+    """
+    rows = fetchMessages(conn, minValue, maxValue, POSTED_MESSAGE, last, datetime.now())
+    for row in rows:
+        user = row[0]
+        if user not in parsed_data:
+            parsed_data[user] = {MESSAGE_REPLY: 0, REACTION: 0, POSTED_MESSAGE: 0, 'TOTAL': 0}
+
+        upvotes_db = int(str(row[2])) // points
+        parsed_data[user]['TOTAL'] += upvotes_db
+        parsed_data[user][POSTED_MESSAGE] += upvotes_db
+    return parsed_data
+
+def countUpvoteRows(rows, upvote_per_data_type):
+    """
+    This counts the number of reactions, unknown votes
+    """
+    for row in rows:
+        username = row[0]
+        event = row[1]
+        upvotes_db = row[2]
+
+        event_type = TYPE_TO_VAR[event]
+        if username not in upvote_per_data_type:
+            upvote_per_data_type[username] = {MESSAGE_REPLY: 0, REACTION: 0, POSTED_MESSAGE: 0, 'TOTAL': 0}
+        upvote_per_data_type[username][event_type] += upvotes_db * EVENT_POINTS[event_type]
+        upvote_per_data_type[username]['TOTAL'] += upvotes_db * EVENT_POINTS[event_type]
+    return upvote_per_data_type
+
+def getUpvoteMap(conn, last):
+    """
+    Generates a Hash Map with every persons vote
+    """
+    upvote_per_data_type = {}
+
+    # Message Reactions and Message Replies
+    rows = fetchLeaderboard(conn, POSTED_MESSAGE, last, datetime.now())
+    upvote_per_data_type = countUpvoteRows(rows, upvote_per_data_type)
+
+    # Messages and their Char Length
+    for row in MESSAGE_UPVOTE_DISTRIBUTION:
+        upvote_per_data_type = countMessages(conn, last, upvote_per_data_type, row[0], row[1], row[2])
+    return upvote_per_data_type
 
 async def leaderboard(conn, client, channel, limit, guild_id):
     last = fetch_last_tx()
@@ -17,22 +62,31 @@ async def leaderboard(conn, client, channel, limit, guild_id):
         color=0x5125AA,
     )
 
-    rows = fetchLeaderboard(conn, last, datetime.now())
-
-    if len(rows) == 0:
-        embed.add_field(name="``#1`` KanayeNet", value="Even without any votes he is leading!")
-
     counter = 0
     usernames = []
-    upvotes = []
-    for row in rows:
-        if row is None or counter == limit:
-            break
+    upvotes = {MESSAGE_REPLY: [], REACTION: [], POSTED_MESSAGE: []}
+    
+    counter = 0
+    upvote_per_data_type = getUpvoteMap(conn, last)
 
-        user = await interactions.get(client, interactions.Member, object_id=row[0], parent_id=guild_id)
-        embed.add_field(name=f"``#{counter+1}`` {user.name}", value=f"{row[1]} Upvotes", inline=True)
+    if len(list(upvote_per_data_type.keys())) == 0:
+        embed.add_field(name="``#1`` KanayeNet", value="Even without any votes he is leading!")
+
+
+    upvote_per_data_type = {k: v for k, v in sorted(upvote_per_data_type.items(), key=lambda item: item[1]['TOTAL'], reverse=True)}
+    for row in upvote_per_data_type.keys():
+        if counter == limit:
+            break
+        user = await interactions.get(client, interactions.Member, object_id=row, parent_id=guild_id)
+        embed.add_field(name=f"``#{counter+1}`` {user.name}", value=f"{upvote_per_data_type[row]['TOTAL']} Upvotes", inline=True)
         usernames.append(user.name)
-        upvotes.append(row[1])
+        
+        print(upvote_per_data_type[row])
+        for elem in upvote_per_data_type[row]:
+            if elem == 'TOTAL':
+                break
+            upvotes[TYPE_TO_VAR[elem]].append(upvote_per_data_type[row][elem])
+
         counter += 1
     discord_file = generate_graph(usernames, upvotes)
     embed.set_image(url="attachment://graph.png")
@@ -49,25 +103,30 @@ def generate_payouts(conn):
     # possible bug if last_tx_date == None =>
     # counting all votes ever <--> this should only happen when account is new
     last_tx_date = fetch_last_tx()
-    leaderboard_rows = fetchLeaderboard(conn, last_tx_date, datetime.now())
+    
+    # Retrieve the number of upvotes for every type we've made.
+    upvote_per_data_type = getUpvoteMap(conn, last_tx_date)
+    upvote_per_data_type = {k: v for k, v in sorted(upvote_per_data_type.items(), key=lambda item: item[1]['TOTAL'], reverse=True)}
+
     user_rows = fetchUserPubKeys(conn)
     sumVotes = 0
 
     payoutUser = []
 
-    for row in leaderboard_rows:
+    for row in upvote_per_data_type.keys():
         pubKey = None
+        upvotes = upvote_per_data_type[row]['TOTAL']
 
         for user in user_rows:
-            if user[0] == row[0]:
+            if user[0] == row:
                 pubKey = user[1]
 
         if pubKey is not None:
             # user has public key
-            sumVotes += row[1]
-            payoutUser.append((row[0], row[1], pubKey))
+            sumVotes += upvotes
+            payoutUser.append((row, upvotes, pubKey))
         else:
-            print(f"{row[0]} has no pub key connected to their account! They are missing out on {row[1]} upvotes :(")
+            print(f"{row} has no pub key connected to their account! They are missing out on {upvotes} upvotes :(")
 
     tx_cost = (BASE_FEE * len(payoutUser)) / 1000000
 
