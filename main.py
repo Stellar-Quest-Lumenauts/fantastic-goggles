@@ -5,7 +5,6 @@ import sentry_sdk
 from helpers.stellar import validate_pub_key
 
 from helpers.discord import leaderboard, hasRole, notify_submitter
-from helpers.discord import hasRole
 from helpers.database import updateHistory, linkUserPubKey, setup_db, create_connection, getUserPubKey
 from settings.default import (
     SENTRY_ENABLED,
@@ -165,7 +164,7 @@ async def _hello(ctx: CommandContext):
 )
 async def _leaderboard(ctx: CommandContext):
     channel = await interactions.get(client, interactions.Channel, object_id=ctx.channel_id)
-    await ctx.send("Generating leaderboard... Expect the Leaderboard to show up on the channel you executed the command.")
+    await ctx.send("Generating leaderboard... The Leaderboard should show up here, or maybe not.")
     await leaderboard(conn, client, channel, LEADERBOARD_LIMIT, ctx.guild_id)
 
 

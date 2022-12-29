@@ -1,4 +1,3 @@
-import seaborn as sns
 import matplotlib.pyplot as plt
 from interactions import File
 import pandas as pd
