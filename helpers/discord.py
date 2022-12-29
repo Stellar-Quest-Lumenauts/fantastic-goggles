@@ -6,7 +6,17 @@ from .database import fetchLeaderboard, fetchUserPubKeys, fetchMessages
 from .generic import upload_to_hastebin, post_to_refractor
 from .stellar import fetch_last_tx, fetch_account_balance, generate_reward_tx
 from .graphs import generate_graph
-from settings.default import BASE_FEE, USE_REFRACTOR, MESSAGE_REPLY, REACTION, POSTED_MESSAGE, EVENT_POINTS, TYPE_TO_VAR, MESSAGE_UPVOTE_DISTRIBUTION
+from settings.default import (
+    BASE_FEE,
+    USE_REFRACTOR,
+    MESSAGE_REPLY,
+    REACTION,
+    POSTED_MESSAGE,
+    EVENT_POINTS,
+    TYPE_TO_VAR,
+    MESSAGE_UPVOTE_DISTRIBUTION,
+)
+
 
 def countMessages(conn, last, parsed_data: dict, minValue: int, maxValue: int, points: int):
     """
@@ -16,12 +26,13 @@ def countMessages(conn, last, parsed_data: dict, minValue: int, maxValue: int, p
     for row in rows:
         user = row[0]
         if user not in parsed_data:
-            parsed_data[user] = {MESSAGE_REPLY: 0, REACTION: 0, POSTED_MESSAGE: 0, 'TOTAL': 0}
+            parsed_data[user] = {MESSAGE_REPLY: 0, REACTION: 0, POSTED_MESSAGE: 0, "TOTAL": 0}
 
         upvotes_db = int(str(row[2])) // points
-        parsed_data[user]['TOTAL'] += upvotes_db
+        parsed_data[user]["TOTAL"] += upvotes_db
         parsed_data[user][POSTED_MESSAGE] += upvotes_db
     return parsed_data
+
 
 def countUpvoteRows(rows, upvote_per_data_type):
     """
@@ -34,10 +45,11 @@ def countUpvoteRows(rows, upvote_per_data_type):
 
         event_type = TYPE_TO_VAR[event]
         if username not in upvote_per_data_type:
-            upvote_per_data_type[username] = {MESSAGE_REPLY: 0, REACTION: 0, POSTED_MESSAGE: 0, 'TOTAL': 0}
+            upvote_per_data_type[username] = {MESSAGE_REPLY: 0, REACTION: 0, POSTED_MESSAGE: 0, "TOTAL": 0}
         upvote_per_data_type[username][event_type] += upvotes_db * EVENT_POINTS[event_type]
-        upvote_per_data_type[username]['TOTAL'] += upvotes_db * EVENT_POINTS[event_type]
+        upvote_per_data_type[username]["TOTAL"] += upvotes_db * EVENT_POINTS[event_type]
     return upvote_per_data_type
+
 
 def getUpvoteMap(conn, last):
     """
@@ -54,6 +66,7 @@ def getUpvoteMap(conn, last):
         upvote_per_data_type = countMessages(conn, last, upvote_per_data_type, row[0], row[1], row[2])
     return upvote_per_data_type
 
+
 async def leaderboard(conn, client, channel, limit, guild_id):
     last = fetch_last_tx()
     embed = Embed(
@@ -65,25 +78,28 @@ async def leaderboard(conn, client, channel, limit, guild_id):
     counter = 0
     usernames = []
     upvotes = {MESSAGE_REPLY: [], REACTION: [], POSTED_MESSAGE: []}
-    
+
     counter = 0
     upvote_per_data_type = getUpvoteMap(conn, last)
 
     if len(list(upvote_per_data_type.keys())) == 0:
         embed.add_field(name="``#1`` KanayeNet", value="Even without any votes he is leading!")
 
-
-    upvote_per_data_type = {k: v for k, v in sorted(upvote_per_data_type.items(), key=lambda item: item[1]['TOTAL'], reverse=True)}
+    upvote_per_data_type = {
+        k: v for k, v in sorted(upvote_per_data_type.items(), key=lambda item: item[1]["TOTAL"], reverse=True)
+    }
     for row in upvote_per_data_type.keys():
         if counter == limit:
             break
         user = await interactions.get(client, interactions.Member, object_id=row, parent_id=guild_id)
-        embed.add_field(name=f"``#{counter+1}`` {user.name}", value=f"{upvote_per_data_type[row]['TOTAL']} Upvotes", inline=True)
+        embed.add_field(
+            name=f"``#{counter+1}`` {user.name}", value=f"{upvote_per_data_type[row]['TOTAL']} Upvotes", inline=True
+        )
         usernames.append(user.name)
-        
+
         print(upvote_per_data_type[row])
         for elem in upvote_per_data_type[row]:
-            if elem == 'TOTAL':
+            if elem == "TOTAL":
                 break
             upvotes[TYPE_TO_VAR[elem]].append(upvote_per_data_type[row][elem])
 
@@ -103,10 +119,12 @@ def generate_payouts(conn):
     # possible bug if last_tx_date == None =>
     # counting all votes ever <--> this should only happen when account is new
     last_tx_date = fetch_last_tx()
-    
+
     # Retrieve the number of upvotes for every type we've made.
     upvote_per_data_type = getUpvoteMap(conn, last_tx_date)
-    upvote_per_data_type = {k: v for k, v in sorted(upvote_per_data_type.items(), key=lambda item: item[1]['TOTAL'], reverse=True)}
+    upvote_per_data_type = {
+        k: v for k, v in sorted(upvote_per_data_type.items(), key=lambda item: item[1]["TOTAL"], reverse=True)
+    }
 
     user_rows = fetchUserPubKeys(conn)
     sumVotes = 0
@@ -115,7 +133,7 @@ def generate_payouts(conn):
 
     for row in upvote_per_data_type.keys():
         pubKey = None
-        upvotes = upvote_per_data_type[row]['TOTAL']
+        upvotes = upvote_per_data_type[row]["TOTAL"]
 
         for user in user_rows:
             if user[0] == row:
