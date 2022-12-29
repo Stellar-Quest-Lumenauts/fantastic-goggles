@@ -165,8 +165,8 @@ async def _hello(ctx: CommandContext):
 )
 async def _leaderboard(ctx: CommandContext):
     channel = await interactions.get(client, interactions.Channel, object_id=ctx.channel_id)
+    await ctx.send("Generating leaderboard... Expect the Leaderboard to show up on the channel you executed the command.")
     await leaderboard(conn, client, channel, LEADERBOARD_LIMIT, ctx.guild_id)
-    await ctx.send("The Leaderboard has been generated.")
 
 
 @client.command(name="distribute", description="Start prize distribution!")

@@ -10,10 +10,11 @@ def generate_graph(usernames, upvotes):
     """
     Generate a Bar chart with each username and the current number of upvotes
     """
-
-    if usernames == [] and upvotes == []:
+    if usernames == []:
         usernames = ["KanayeNet"]  # I didn't get bribed for this.
         upvotes = upvotes = {MESSAGE_REPLY: [140], REACTION: [140], POSTED_MESSAGE: [140]}
+
+    print(upvotes)
 
     df = pd.DataFrame({
         "Posted Messages": upvotes[TYPE_TO_VAR[POSTED_MESSAGE]],
