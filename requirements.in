@@ -11,3 +11,4 @@ requests-mock
 environs
 coverage
 seaborn
+pandas

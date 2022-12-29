@@ -219,7 +219,7 @@ def removeHistory(conn: Connection, message_id: str, author=None, backer=None) -
     return c.rowcount > 0
 
 
-def fetchLeaderboard(conn: Connection, dateFrom: datetime = None, dateTo: datetime = None):
+def fetchLeaderboard(conn: Connection, disallow_vote_type: int = POSTED_MESSAGE, dateFrom: datetime = None, dateTo: datetime = None):
     """
     Returns the current leaderboard
     """
@@ -232,14 +232,41 @@ def fetchLeaderboard(conn: Connection, dateFrom: datetime = None, dateTo: dateti
     c.execute(
         prepareQuery(
             """
-            SELECT user_id, COUNT(user_id) as votes FROM votes_history
-            WHERE vote_time >= ? AND vote_time <= ? GROUP BY user_id ORDER by votes DESC, user_id ASC
+            SELECT user_id, vote_type, COUNT(user_id) as votes FROM votes_history
+            WHERE vote_time >= ? AND vote_time <= ? AND VOTE_TYPE != ? GROUP BY user_id, vote_type ORDER by votes DESC, user_id ASC
             """
         ),
-        (dateFrom, dateTo),
+        (dateFrom, dateTo, disallow_vote_type),
     )
     return c.fetchall()
 
+def fetchMessages(conn: Connection, minValue: int, maxValue: int, vote_type: int, dateFrom: datetime = None, dateTo: datetime = None):
+    """
+    Return the Number of total chars.
+    Love you Kanaye for the SQL Query <3 Thank you :)
+    """
+    if dateFrom is None:
+        dateFrom = datetime.utcfromtimestamp(0)
+    if dateTo is None:
+        dateTo = datetime.now()
+
+    c = conn.cursor()
+    c.execute(
+        prepareQuery(
+            """
+            SELECT user_id, vote_type, COUNT(messages.character_count) as votes FROM votes_history
+            INNER JOIN messages ON messages.message_id = votes_history.message_id
+            WHERE vote_type = 2
+            AND messages.character_count >= ? -- you will need to replace this
+            AND messages.character_count < ? -- and this
+            AND vote_time >= ? 
+            AND vote_time <= ?
+            GROUP BY user_id, vote_type
+            ORDER by user_id, votes DESC, user_id ASC
+            """
+        ),(minValue, maxValue, dateFrom, dateTo),
+    )
+    return c.fetchall()
 
 def queryHistory(conn: Connection, message_id: str):
     """
