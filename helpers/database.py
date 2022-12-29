@@ -235,7 +235,11 @@ def fetchLeaderboard(
         prepareQuery(
             """
             SELECT user_id, vote_type, COUNT(user_id) as votes FROM votes_history
-            WHERE vote_time >= ? AND vote_time <= ? AND VOTE_TYPE != ? GROUP BY user_id, vote_type ORDER by votes DESC, user_id ASC
+            WHERE vote_time >= ? 
+            AND vote_time <= ? 
+            AND VOTE_TYPE != ? 
+            GROUP BY user_id, vote_type 
+            ORDER by votes DESC, user_id ASC
             """
         ),
         (dateFrom, dateTo, disallow_vote_type),
@@ -264,7 +268,7 @@ def fetchMessages(
             WHERE vote_type = 2
             AND messages.character_count >= ? -- you will need to replace this
             AND messages.character_count < ? -- and this
-            AND vote_time >= ? 
+            AND vote_time >= ?
             AND vote_time <= ?
             GROUP BY user_id, vote_type
             ORDER by user_id, votes DESC, user_id ASC
