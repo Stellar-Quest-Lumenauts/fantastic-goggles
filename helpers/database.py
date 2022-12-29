@@ -235,10 +235,10 @@ def fetchLeaderboard(
         prepareQuery(
             """
             SELECT user_id, vote_type, COUNT(user_id) as votes FROM votes_history
-            WHERE vote_time >= ? 
-            AND vote_time <= ? 
-            AND VOTE_TYPE != ? 
-            GROUP BY user_id, vote_type 
+            WHERE vote_time >= ?
+            AND vote_time <= ?
+            AND VOTE_TYPE != ?
+            GROUP BY user_id, vote_type
             ORDER by votes DESC, user_id ASC
             """
         ),
