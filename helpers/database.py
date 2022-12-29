@@ -219,7 +219,9 @@ def removeHistory(conn: Connection, message_id: str, author=None, backer=None) -
     return c.rowcount > 0
 
 
-def fetchLeaderboard(conn: Connection, disallow_vote_type: int = POSTED_MESSAGE, dateFrom: datetime = None, dateTo: datetime = None):
+def fetchLeaderboard(
+    conn: Connection, disallow_vote_type: int = POSTED_MESSAGE, dateFrom: datetime = None, dateTo: datetime = None
+):
     """
     Returns the current leaderboard
     """
@@ -240,7 +242,10 @@ def fetchLeaderboard(conn: Connection, disallow_vote_type: int = POSTED_MESSAGE,
     )
     return c.fetchall()
 
-def fetchMessages(conn: Connection, minValue: int, maxValue: int, vote_type: int, dateFrom: datetime = None, dateTo: datetime = None):
+
+def fetchMessages(
+    conn: Connection, minValue: int, maxValue: int, vote_type: int, dateFrom: datetime = None, dateTo: datetime = None
+):
     """
     Return the Number of total chars.
     Love you Kanaye for the SQL Query <3 Thank you :)
@@ -264,9 +269,11 @@ def fetchMessages(conn: Connection, minValue: int, maxValue: int, vote_type: int
             GROUP BY user_id, vote_type
             ORDER by user_id, votes DESC, user_id ASC
             """
-        ),(minValue, maxValue, dateFrom, dateTo),
+        ),
+        (minValue, maxValue, dateFrom, dateTo),
     )
     return c.fetchall()
+
 
 def queryHistory(conn: Connection, message_id: str):
     """
