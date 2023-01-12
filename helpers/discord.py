@@ -1,8 +1,7 @@
-from datetime import datetime
 from interactions import Embed
 import interactions
 
-from .database import fetchUserPubKeys, fetchMessages, getUpvoteMap
+from .database import fetchUserPubKeys, getUpvoteMap
 from .generic import upload_to_hastebin, post_to_refractor
 from .stellar import fetch_last_tx, fetch_account_balance, generate_reward_tx
 from .graphs import generate_graph
@@ -12,10 +11,9 @@ from settings.default import (
     MESSAGE_REPLY,
     REACTION,
     POSTED_MESSAGE,
-    EVENT_POINTS,
     TYPE_TO_VAR,
-    MESSAGE_UPVOTE_DISTRIBUTION,
 )
+
 
 async def leaderboard(conn, client, channel, limit, guild_id):
     last = fetch_last_tx()
