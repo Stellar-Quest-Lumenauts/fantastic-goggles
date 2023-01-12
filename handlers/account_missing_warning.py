@@ -1,10 +1,8 @@
-from datetime import datetime
 import discord
 from discord.embeds import Embed
 
 from helpers.stellar import fetch_last_tx
 from helpers.database import (
-    fetchLeaderboard,
     fetchUserPubKeys,
     setup_db,
     create_connection,
@@ -28,7 +26,8 @@ async def fetch_users_missing_pub(conn=conn):
 
     for row in leaderboard_rows:
         if not [user for user in user_rows if user[0] == row] and row != client.user.id:
-            print(f"{row} has no pub key connected to their account! They are missing out on {leaderboard_rows[row]['TOTAL']} upvotes.")
+            upvotes = leaderboard_rows[row]['TOTAL']
+            print(f"{row} has no pub key connected to their account! They are missing out on {upvotes} upvotes.")
             missingUsers.append(row)
 
     return missingUsers

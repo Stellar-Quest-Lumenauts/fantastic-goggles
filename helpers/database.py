@@ -9,7 +9,6 @@ from settings.default import (
     POSTED_MESSAGE,
     MESSAGE_REPLY,
     REACTION,
-    POSTED_MESSAGE,
     EVENT_POINTS,
     TYPE_TO_VAR,
     MESSAGE_UPVOTE_DISTRIBUTION,
