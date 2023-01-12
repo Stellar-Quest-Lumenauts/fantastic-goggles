@@ -4,7 +4,16 @@ import sqlite3
 from typing import Any, Union
 import psycopg2
 
-from settings.default import SQLITE3_ENABLED, POSTED_MESSAGE
+from settings.default import (
+    SQLITE3_ENABLED,
+    POSTED_MESSAGE,
+    MESSAGE_REPLY,
+    REACTION,
+    POSTED_MESSAGE,
+    EVENT_POINTS,
+    TYPE_TO_VAR,
+    MESSAGE_UPVOTE_DISTRIBUTION,
+)
 
 Connection = Union[sqlite3.Connection, Any]
 
@@ -290,3 +299,52 @@ def queryHistory(conn: Connection, message_id: str):
     )
     row = c.fetchone()
     return row
+
+
+def countMessages(conn, last, parsed_data: dict, minValue: int, maxValue: int, points: int):
+    """
+    Count the Messages based on an upvote formula
+    """
+    rows = fetchMessages(conn, minValue, maxValue, POSTED_MESSAGE, last, datetime.now())
+    for row in rows:
+        user = row[0]
+        if user not in parsed_data:
+            parsed_data[user] = {MESSAGE_REPLY: 0, REACTION: 0, POSTED_MESSAGE: 0, "TOTAL": 0}
+
+        upvotes_db = int(str(row[2])) // points
+        parsed_data[user]["TOTAL"] += upvotes_db
+        parsed_data[user][POSTED_MESSAGE] += upvotes_db
+    return parsed_data
+
+
+def countUpvoteRows(rows, upvote_per_data_type):
+    """
+    This counts the number of reactions, unknown votes
+    """
+    for row in rows:
+        username = row[0]
+        event = row[1]
+        upvotes_db = row[2]
+
+        event_type = TYPE_TO_VAR[event]
+        if username not in upvote_per_data_type:
+            upvote_per_data_type[username] = {MESSAGE_REPLY: 0, REACTION: 0, POSTED_MESSAGE: 0, "TOTAL": 0}
+        upvote_per_data_type[username][event_type] += upvotes_db * EVENT_POINTS[event_type]
+        upvote_per_data_type[username]["TOTAL"] += upvotes_db * EVENT_POINTS[event_type]
+    return upvote_per_data_type
+
+
+def getUpvoteMap(conn, last):
+    """
+    Generates a Hash Map with every persons vote
+    """
+    upvote_per_data_type = {}
+
+    # Message Reactions and Message Replies
+    rows = fetchLeaderboard(conn, POSTED_MESSAGE, last, datetime.now())
+    upvote_per_data_type = countUpvoteRows(rows, upvote_per_data_type)
+
+    # Messages and their Char Length
+    for row in MESSAGE_UPVOTE_DISTRIBUTION:
+        upvote_per_data_type = countMessages(conn, last, upvote_per_data_type, row[0], row[1], row[2])
+    return upvote_per_data_type
