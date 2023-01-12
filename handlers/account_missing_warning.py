@@ -8,6 +8,7 @@ from helpers.database import (
     fetchUserPubKeys,
     setup_db,
     create_connection,
+    getUpvoteMap
 )
 from settings.default import DATABASE_NAME, DISCORD_BOT_TOKEN
 
@@ -21,15 +22,13 @@ async def fetch_users_missing_pub(conn=conn):
     Fetches all users still missing an public key for reward distribution
     returns array of tuples (user_id, potential_votes)
     """
-
-    leaderboard_rows = fetchLeaderboard(conn, fetch_last_tx(), datetime.now())
+    leaderboard_rows = getUpvoteMap(conn, fetch_last_tx())
     user_rows = fetchUserPubKeys(conn)
     missingUsers = []
 
     for row in leaderboard_rows:
-
-        if not [user for user in user_rows if user[0] == row[0]] and row[0] != client.user.id:
-            print(f"{row[0]} has no pub key connected to their account! They are missing out on {row[1]} upvotes.")
+        if not [user for user in user_rows if user[0] == row] and row != client.user.id:
+            print(f"{row} has no pub key connected to their account! They are missing out on {leaderboard_rows[row]['TOTAL']} upvotes.")
             missingUsers.append(row)
 
     return missingUsers
