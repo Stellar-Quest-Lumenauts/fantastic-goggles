@@ -170,8 +170,9 @@ async def _leaderboard(ctx: CommandContext):
 
 @client.command(name="distribute", description="Start prize distribution!")
 async def _distribute(ctx: CommandContext):
-    if ctx.author.id == NOTIFY_USER:
-        await notify_submitter(client, conn, NOTIFY_USER, ctx.guild_id)
+    author = ctx.author if ctx.author is not None else ctx.user
+    if author == NOTIFY_USER:
+        await notify_submitter(client, conn, NOTIFY_USER)
         await ctx.send("https://tenor.com/view/sacha-baron-cohen-great-success-yay-gif-4185058")
     else:
         await ctx.send("https://tenor.com/view/you-shall-not-pass-lotr-do-not-enter-not-allowed-scream-gif-16729885")

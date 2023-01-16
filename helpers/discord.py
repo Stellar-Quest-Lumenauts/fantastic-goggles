@@ -127,8 +127,7 @@ def generate_report(payouts: list) -> str:
     return tx_xdr  # todo size limit?
 
 
-async def notify_submitter(client, conn, user, guild_id):
-    notify_user = await interactions.get(client, interactions.Member, object_id=user, parent_id=guild_id)
+async def notify_submitter(client, conn, user):
     try:
         payouts = generate_payouts(conn)
         report = generate_report(payouts)
@@ -138,4 +137,4 @@ async def notify_submitter(client, conn, user, guild_id):
             content = upload_to_hastebin(report)
     except Exception as e:
         content = f"```{e}```"
-    await notify_user.send(content=f"New week, new lumenaut rewards:\n{content}")
+    await user.send(content=f"New week, new lumenaut rewards:\n{content}")
