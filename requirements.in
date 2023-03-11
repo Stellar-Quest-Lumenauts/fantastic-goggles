@@ -1,7 +1,7 @@
 discord.py
 discord-py-interactions
 stellar-sdk
-postbin
+git+https://github.com/Stellar-Quest-Lumenauts/PostBin/
 psycopg2
 pip-tools
 flake8
