@@ -22,7 +22,7 @@ from settings.default import (
 )
 
 if SENTRY_ENABLED:
-    sentry_sdk.init(SENTRY_URL, traces_sample_rate=1.0)
+    sentry_sdk.init(SENTRY_URL, traces_sample_rate=1.0, debug=True)
 
 if not isinstance(DISCORD_ALLOWED_REACTION, list) or (
     len(DISCORD_ALLOWED_REACTION) != 0 and not isinstance(DISCORD_ALLOWED_REACTION[0], str)
