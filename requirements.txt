@@ -103,7 +103,7 @@ pip-tools==6.12.1
     # via -r requirements.in
 platformdirs==2.6.0
     # via black
-postbin==1.2.0
+postbin @ git+https://github.com/Stellar-Quest-Lumenauts/PostBin/
     # via -r requirements.in
 psycopg2==2.9.5
     # via -r requirements.in
