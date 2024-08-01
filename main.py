@@ -66,7 +66,7 @@ async def on_message_create(message):
     channel_id = message.channel_id
 
     # Each Discord Thread is it's own Channel, So get the Parent Channel's ID and check that instead.
-    if channel.type == ChannelType.PUBLIC_THREAD:
+    if channel.type == ChannelType.PUBLIC_THREAD or channel.type == ChannelType.PRIVATE_THREAD:
         channel_id = channel.parent_id
 
     if message.author == client.me.id:
@@ -95,7 +95,7 @@ async def on_message_reaction_add(reaction):
     channel_id = reaction.channel_id
 
     # Each Discord Thread is it's own Channel, So get the Parent Channel's ID and check that instead.
-    if channel.type == ChannelType.PUBLIC_THREAD:
+    if channel.type == ChannelType.PUBLIC_THREAD or channel.type == ChannelType.PRIVATE_THREAD:
         channel_id = channel.parent_id
 
     user_id = reaction.user_id
