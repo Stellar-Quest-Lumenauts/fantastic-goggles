@@ -31,4 +31,4 @@ def generate_graph(usernames, upvotes):
     data_stream.seek(0)
 
     plt.close()
-    return File(filename="graph.png", fp=data_stream)
+    return File(file_name="graph.png", file=data_stream)
