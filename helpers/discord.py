@@ -39,11 +39,12 @@ async def leaderboard(conn, client, channel, limit, guild_id):
     for row in upvote_per_data_type.keys():
         if counter == limit:
             break
-        user = await interactions.get(client, interactions.Member, object_id=row, parent_id=guild_id)
+        
+        user = await client.fetch_member(row, guild_id)
         embed.add_field(
-            name=f"``#{counter+1}`` {user.name}", value=f"{upvote_per_data_type[row]['TOTAL']} Upvotes", inline=True
+            name=f"``#{counter+1}`` {user.display_name}", value=f"{upvote_per_data_type[row]['TOTAL']} Upvotes", inline=True
         )
-        usernames.append(user.name)
+        usernames.append(user.display_name)
 
         print(upvote_per_data_type[row])
         for elem in upvote_per_data_type[row]:

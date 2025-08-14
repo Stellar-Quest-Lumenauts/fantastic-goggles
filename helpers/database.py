@@ -310,7 +310,9 @@ def countMessages(conn, last, parsed_data: dict, minValue: int, maxValue: int, p
         if user not in parsed_data:
             parsed_data[user] = {MESSAGE_REPLY: 0, REACTION: 0, POSTED_MESSAGE: 0, "TOTAL": 0}
 
-        upvotes_db = int(str(row[2])) // max(points, 1)
+        vote_count = int(row[2])
+        upvotes_db = vote_count * points
+
         parsed_data[user]["TOTAL"] += upvotes_db
         parsed_data[user][POSTED_MESSAGE] += upvotes_db
     return parsed_data

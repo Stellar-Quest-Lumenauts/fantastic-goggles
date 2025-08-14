@@ -50,7 +50,7 @@ EVENT_POINTS = {
 # TODO: FIGURE OUT HOW TO USE ENVIORNMENT VARIABLES FOR THIS.
 # TEMPORARY HACK
 MESSAGE_UPVOTE_DISTRIBUTION = [
-    (25, 75, 0),
-    (76, 150, 0),
-    (151, 6000, 0),  # 6000 is the maximum chars for an upvote - Set By Discord
+    (25, 75, 1),
+    (76, 150, 2),
+    (151, 6000, 3),  # 6000 is the maximum chars for an upvote - Set By Discord
 ]
