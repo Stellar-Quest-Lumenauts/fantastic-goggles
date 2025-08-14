@@ -50,9 +50,11 @@ client = Client(
 
 conn = create_connection(DATABASE_NAME)
 
+
 def processVote(message_id, channel_id, author, backer, vote_type, characther_count):
     if updateHistory(conn, author, message_id, channel_id, backer, vote_type, characther_count):
         print(f"{author} got an upvote!")
+
 
 @listen(Ready)
 async def on_ready():
@@ -71,7 +73,7 @@ async def on_message_create(event: MessageCreate):
         channel_id = channel.parent_id
 
     if message.author == client.user.id:
-        return  
+        return
 
     if channel_id not in DISCORD_WHITELIST_CHANNELS and len(DISCORD_WHITELIST_CHANNELS) != 0:
         return
@@ -170,7 +172,7 @@ async def _leaderboard(ctx: SlashContext):
 
 
 @slash_command(
-    name="distribute", 
+    name="distribute",
     description="Start prize distribution!"
 )
 async def _distribute(ctx: SlashContext):
