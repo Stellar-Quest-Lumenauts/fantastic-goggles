@@ -1,5 +1,14 @@
-import interactions
-from interactions import Client, Intents, OptionType, SlashContext, Status, ChannelType, slash_command, slash_option, listen
+from interactions import (
+    Client,
+    Intents,
+    OptionType,
+    SlashContext,
+    Status,
+    ChannelType,
+    slash_command,
+    slash_option,
+    listen
+)
 from interactions.api.events import Ready, MessageCreate, MessageReactionAdd
 import sentry_sdk
 
@@ -150,7 +159,10 @@ async def _my_pub_key(ctx: SlashContext):
     if public_key is not None:
         await ctx.send(f"Your account is associated with the following public_key {public_key}", ephemeral=True)
     else:
-        await ctx.send("Your account has not been found. Use `/link public_key` to add it to the database.", ephemeral=True)
+        await ctx.send(
+            "Your account has not been found. Use `/link public_key` to add it to the database.",
+            ephemeral=True
+        )
 
 
 @slash_command(
@@ -179,9 +191,15 @@ async def _distribute(ctx: SlashContext):
     author = ctx.author if ctx.author is not None else ctx.user
     if author.id == NOTIFY_USER:
         await notify_submitter(client, conn, author)
-        await ctx.send("https://tenor.com/view/sacha-baron-cohen-great-success-yay-gif-4185058", ephemeral=True)
+        await ctx.send(
+            "https://tenor.com/view/sacha-baron-cohen-great-success-yay-gif-4185058",
+            ephemeral=True
+        )
     else:
-        await ctx.send("https://tenor.com/view/you-shall-not-pass-lotr-do-not-enter-not-allowed-scream-gif-16729885", ephemeral=True)
+        await ctx.send(
+            "https://tenor.com/view/you-shall-not-pass-lotr-do-not-enter-not-allowed-scream-gif-16729885",
+            ephemeral=True
+        )
 
 if __name__ == "__main__":
     setup_db(conn)

@@ -1,6 +1,4 @@
 from interactions import Embed
-import interactions
-
 from .database import fetchUserPubKeys, getUpvoteMap
 from .generic import upload_to_hastebin, post_to_refractor
 from .stellar import fetch_last_tx, fetch_account_balance, generate_reward_tx
@@ -42,7 +40,9 @@ async def leaderboard(conn, client, channel, limit, guild_id):
 
         user = await client.fetch_member(row, guild_id)
         embed.add_field(
-            name=f"``#{counter+1}`` {user.display_name}", value=f"{upvote_per_data_type[row]['TOTAL']} Upvotes", inline=True
+            name=f"``#{counter+1}`` {user.display_name}",
+            value=f"{upvote_per_data_type[row]['TOTAL']} Upvotes",
+            inline=True
         )
         usernames.append(user.display_name)
 
