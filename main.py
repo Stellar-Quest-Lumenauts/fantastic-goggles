@@ -92,7 +92,7 @@ async def on_message_create(event: MessageCreate):
         async for member in message.mention_users:
             if member.id == message.author.id or not hasRole(member.roles, REQUIRED_ROLE_ID):
                 continue
-            processVote(message.id, channel_id, member.id, message.author.id, MESSAGE_REPLY, 0)
+            processVote(message.id, channel_id, member.id, message.author.id, MESSAGE_REPLY, "0")
 
     # Check if the Author is a Lumenaut and Count his Content in a Message
     member = await client.fetch_member(message.author.id, message.guild.id)
