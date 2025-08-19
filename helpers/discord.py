@@ -61,7 +61,7 @@ async def leaderboard(conn, client, channel, limit, guild_id):
 
 def hasRole(roles, REQUIRED_ROLE_ID):
     roles = [int(role) for role in roles]
-    return REQUIRED_ROLE_ID in roles
+    return set(roles) & set(REQUIRED_ROLE_ID)
 
 
 def generate_payouts(conn):
