@@ -6,7 +6,7 @@ to print them and create a SQL-`WHERE` selector.
 from helpers.database import fetchLeaderboard, setup_db
 from main import conn, client
 from helpers.discord import hasRole
-from settings.default import DISCORD_BOT_TOKEN, DISCORD_SERVER_ID, REQUIRED_ROLE_ID
+from settings.default import DISCORD_BOT_TOKEN, DISCORD_SERVER_ID, REQUIRED_ROLE_IDS
 
 
 @client.event
@@ -21,7 +21,7 @@ async def on_ready():
             continue
         try:
             member = guild.get_member(row[0])
-            if hasRole(member.roles, REQUIRED_ROLE_ID):
+            if hasRole(member.roles, REQUIRED_ROLE_IDS):
                 continue
         except Exception:
             print(f"Found invalid user {row[0]}!")

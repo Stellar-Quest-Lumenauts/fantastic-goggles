@@ -24,7 +24,7 @@ from settings.default import (
     DATABASE_NAME,
     LEADERBOARD_LIMIT,
     NOTIFY_USER,
-    REQUIRED_ROLE_ID,
+    REQUIRED_ROLE_IDS,
     DISCORD_BOT_TOKEN,
     MESSAGE_REPLY,
     REACTION,
@@ -90,13 +90,13 @@ async def on_message_create(event: MessageCreate):
     # We are just looking for an individual user ping
     if message.mention_users != []:
         async for member in message.mention_users:
-            if member.id == message.author.id or not hasRole(member.roles, REQUIRED_ROLE_ID):
+            if member.id == message.author.id or not hasRole(member.roles, REQUIRED_ROLE_IDS):
                 continue
             processVote(message.id, channel_id, member.id, message.author.id, MESSAGE_REPLY, "0")
 
     # Check if the Author is a Lumenaut and Count his Content in a Message
     member = await client.fetch_member(message.author.id, message.guild.id)
-    if hasRole(member.roles, REQUIRED_ROLE_ID):
+    if hasRole(member.roles, REQUIRED_ROLE_IDS):
         processVote(message.id, channel_id, message.author.id, None, POSTED_MESSAGE, len(message.content))
 
 
@@ -123,7 +123,7 @@ async def on_message_reaction_add(event):
     if (
         (reaction.emoji.name in DISCORD_ALLOWED_REACTION or len(DISCORD_ALLOWED_REACTION) == 0)
         and user_id != message.author.id
-        and hasRole(member.roles, REQUIRED_ROLE_ID)
+        and hasRole(member.roles, REQUIRED_ROLE_IDS)
         and user_id != client.user.id
     ):
         processVote(message_id, reaction.channel.id, message.author.id, user_id, REACTION, "0")
